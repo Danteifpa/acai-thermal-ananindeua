@@ -79,7 +79,21 @@ const Index = () => {
           {renderView()}
           
           {currentView !== 'memorial' && (
-            <footer className="pt-10 border-t border-slate-900">
+            <footer className="pt-10 border-t border-slate-900 flex flex-col items-center gap-4">
+              <div className="flex items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-1">
+                    <span className="text-xs font-black text-white">IFPA</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500">PARCEIRO TÉCNICO</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-1">
+                    <span className="text-xs font-black text-white">SEMAD</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500">APOIO INSTITUCIONAL</span>
+                </div>
+              </div>
               <MadeWithDyad />
             </footer>
           )}
