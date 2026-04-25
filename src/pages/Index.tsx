@@ -10,6 +10,7 @@ import Settings from '@/components/Settings';
 import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
 import BatedoresDatabase from '@/components/BatedoresDatabase';
+import About from '@/components/About';
 import { supabase } from '@/lib/supabase';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -66,6 +67,8 @@ const Index = () => {
         return <FullHistory records={records} />;
       case 'memorial':
         return <TechnicalMemorial />;
+      case 'about':
+        return <About />;
       case 'settings':
         return <Settings constants={thermalConstants} onUpdate={setThermalConstants} />;
       default:
@@ -82,7 +85,10 @@ const Index = () => {
           {renderView()}
           
           {currentView !== 'memorial' && (
-            <footer className="pt-10 border-t border-slate-900 flex flex-col items-center gap-4">
+            <footer className="pt-10 border-t border-slate-900 flex flex-col items-center gap-4 pb-8">
+              <p className="text-[10px] md:text-xs text-slate-500 opacity-60 text-center px-4">
+                © 2026 AçaíThermal - Desenvolvido por Dante Monteiro, Thais Chagas e Edenilson do Carmo.
+              </p>
               <MadeWithDyad />
             </footer>
           )}
