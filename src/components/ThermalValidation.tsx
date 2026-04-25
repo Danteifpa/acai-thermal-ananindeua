@@ -13,25 +13,21 @@ import { supabase } from '@/lib/supabase';
 
 interface ThermalValidationProps {
   onRecordSaved: () => void;
+  constants: { metal: number; plastic: number };
 }
 
-const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
+const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps) => {
   const [nomeBatedouro, setNomeBatedouro] = useState('');
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Physics Logic: Newton's Law of Cooling
-  // T(t) = T_env + (T0 - T_env) * e^(-kt)
   const simulationData = useMemo(() => {
-    const T0 = 80; // Initial temp (boiling water mix)
-    const Tenv = 25; // Ambient temp
-    const timeSteps = 60; // 600 seconds in 10s intervals
+    const T0 = 80; 
+    const Tenv = 25; 
+    const timeSteps = 60; 
     
-    // k depends on material and volume
-    // Metal cools faster (higher k), Plastic cools slower (lower k)
-    // Larger volume cools slower (lower k)
-    const materialConstant = material === 'Metal' ? 0.004 : 0.0015;
+    const materialConstant = material === 'Metal' ? constants.metal : constants.plastic;
     const k = materialConstant / Math.pow(volume || 1, 0.3);
     
     const data = [];
@@ -41,7 +37,7 @@ const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
       data.push({ time: t, temp: parseFloat(temp.toFixed(1)) });
     }
     return data;
-  }, [volume, material]);
+  }, [volume, material, constants]);
 
   const finalTemp = simulationData[simulationData.length - 1].temp;
   const isSafe = finalTemp >= 52.5;
@@ -80,7 +76,6 @@ const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Column 1: Input Parameters */}
       <Card className="lg:col-span-1 bg-slate-900 border-slate-800 p-6 space-y-6">
         <h2 className="text-xl font-semibold text-white">Parâmetros de Entrada</h2>
         
@@ -133,7 +128,6 @@ const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
         </Button>
       </Card>
 
-      {/* Column 2 & 3: Results Area */}
       <div className="lg:col-span-2 space-y-6">
         {isSafe ? (
           <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-8 flex items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
