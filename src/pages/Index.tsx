@@ -8,6 +8,7 @@ import SafetyStandards from '@/components/SafetyStandards';
 import FullHistory from '@/components/FullHistory';
 import Settings from '@/components/Settings';
 import TechnicalMemorial from '@/components/TechnicalMemorial';
+import DashboardStats from '@/components/DashboardStats';
 import { supabase } from '@/lib/supabase';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -46,6 +47,9 @@ const Index = () => {
               <h1 className="text-4xl font-black text-white tracking-tight">Validação Térmica</h1>
               <p className="text-slate-400 text-lg">Monitoramento de segurança biológica para processamento de Açaí.</p>
             </header>
+            
+            <DashboardStats records={records} />
+            
             <ThermalValidation 
               onRecordSaved={fetchRecords} 
               constants={thermalConstants}
