@@ -7,6 +7,7 @@ import RecordsTable from '@/components/RecordsTable';
 import SafetyStandards from '@/components/SafetyStandards';
 import FullHistory from '@/components/FullHistory';
 import Settings from '@/components/Settings';
+import TechnicalMemorial from '@/components/TechnicalMemorial';
 import { supabase } from '@/lib/supabase';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -56,6 +57,8 @@ const Index = () => {
         return <SafetyStandards />;
       case 'history':
         return <FullHistory records={records} />;
+      case 'memorial':
+        return <TechnicalMemorial />;
       case 'settings':
         return <Settings constants={thermalConstants} onUpdate={setThermalConstants} />;
       default:
@@ -67,13 +70,15 @@ const Index = () => {
     <div className="flex min-h-screen bg-slate-950 text-slate-200 font-sans">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
       
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto space-y-10">
+      <main className="flex-1 overflow-y-auto">
+        <div className={currentView === 'memorial' ? "" : "max-w-6xl mx-auto p-8 space-y-10"}>
           {renderView()}
           
-          <footer className="pt-10 border-t border-slate-900">
-            <MadeWithDyad />
-          </footer>
+          {currentView !== 'memorial' && (
+            <footer className="pt-10 border-t border-slate-900">
+              <MadeWithDyad />
+            </footer>
+          )}
         </div>
       </main>
     </div>
