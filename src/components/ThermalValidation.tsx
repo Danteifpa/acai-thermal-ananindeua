@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Input } from "@/components/ui/button";
+import React, { useState, useMemo } from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +11,11 @@ import ThermalChart from './ThermalChart';
 import { showSuccess, showError } from '@/utils/toast';
 import { supabase } from '@/lib/supabase';
 
-const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => {
+interface ThermalValidationProps {
+  onRecordSaved: () => void;
+}
+
+const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
   const [nomeBatedouro, setNomeBatedouro] = useState('');
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
@@ -26,10 +29,8 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
     const timeSteps = 60; // 600 seconds in 10s intervals
     
     // k depends on material and volume (simplified)
-    // Metal conducts heat faster (higher k)
-    // Larger volume retains heat longer (lower k)
     const materialConstant = material === 'Metal' ? 0.004 : 0.0015;
-    const k = materialConstant / Math.pow(volume, 0.3);
+    const k = materialConstant / Math.pow(volume || 1, 0.3);
     
     const data = [];
     for (let i = 0; i <= timeSteps; i++) {
@@ -44,7 +45,7 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
   const isSafe = finalTemp >= 52.5;
 
   const handleSave = async () => {
-    if (!nomeBatedouro) {
+    if (!nomeBatedouro.trim()) {
       showError("Por favor, insira o nome do batedouro.");
       return;
     }
@@ -67,6 +68,7 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
       
       showSuccess("Validação salva com sucesso!");
       onRecordSaved();
+      setNomeBatedouro('');
     } catch (err: any) {
       showError("Erro ao salvar: " + err.message);
     } finally {
@@ -76,17 +78,18 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Column 1: Input Parameters */}
       <Card className="lg:col-span-1 bg-slate-900 border-slate-800 p-6 space-y-6">
         <h2 className="text-xl font-semibold text-white">Parâmetros de Entrada</h2>
         
         <div className="space-y-2">
-          <Label className="text-slate-400">Nome do Batedouro</Input>
+          <Label className="text-slate-400">Nome do Batedouro</Label>
           <input 
             type="text"
             value={nomeBatedouro}
             onChange={(e) => setNomeBatedouro(e.target.value)}
             placeholder="Ex: Batedouro Central"
-            className="w-full bg-slate-950 border-slate-800 text-white rounded-lg p-2 focus:ring-2 focus:ring-purple-600 outline-none"
+            className="w-full bg-slate-950 border-slate-800 text-white rounded-lg p-2 focus:ring-2 focus:ring-purple-600 outline-none transition-all"
           />
         </div>
 
@@ -99,6 +102,7 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
             value={[volume]} 
             onValueChange={(val) => setVolume(val[0])} 
             max={50} 
+            min={1}
             step={1}
             className="py-4"
           />
@@ -127,6 +131,7 @@ const ThermalValidation = ({ onRecordSaved }: { onRecordSaved: () => void }) => 
         </Button>
       </Card>
 
+      {/* Column 2 & 3: Results Area */}
       <div className="lg:col-span-2 space-y-6">
         {isSafe ? (
           <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-8 flex items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
