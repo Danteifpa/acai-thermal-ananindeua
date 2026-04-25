@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { LayoutDashboard, History, Settings, Thermometer, ShieldCheck, BookOpen } from 'lucide-react';
+import { LayoutDashboard, History, Settings, Thermometer, ShieldCheck, BookOpen, Database } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-export type ViewType = 'dashboard' | 'validations' | 'history' | 'security' | 'settings' | 'memorial';
+export type ViewType = 'dashboard' | 'validations' | 'history' | 'security' | 'settings' | 'memorial' | 'database';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -14,6 +14,7 @@ interface SidebarProps {
 const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { id: 'dashboard' as ViewType, icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'database' as ViewType, icon: Database, label: 'Base de Batedores' },
     { id: 'security' as ViewType, icon: ShieldCheck, label: 'Segurança' },
     { id: 'history' as ViewType, icon: History, label: 'Histórico' },
     { id: 'memorial' as ViewType, icon: BookOpen, label: 'Memorial Técnico' },

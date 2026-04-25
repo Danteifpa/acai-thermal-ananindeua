@@ -9,6 +9,7 @@ import FullHistory from '@/components/FullHistory';
 import Settings from '@/components/Settings';
 import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
+import BatedoresDatabase from '@/components/BatedoresDatabase';
 import { supabase } from '@/lib/supabase';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -57,6 +58,8 @@ const Index = () => {
             <RecordsTable records={records.slice(0, 5)} />
           </div>
         );
+      case 'database':
+        return <BatedoresDatabase />;
       case 'security':
         return <SafetyStandards />;
       case 'history':
