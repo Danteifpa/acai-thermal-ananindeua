@@ -28,7 +28,9 @@ const ThermalValidation = ({ onRecordSaved }: ThermalValidationProps) => {
     const Tenv = 25; // Ambient temp
     const timeSteps = 60; // 600 seconds in 10s intervals
     
-    // k depends on material and volume (simplified)
+    // k depends on material and volume
+    // Metal cools faster (higher k), Plastic cools slower (lower k)
+    // Larger volume cools slower (lower k)
     const materialConstant = material === 'Metal' ? 0.004 : 0.0015;
     const k = materialConstant / Math.pow(volume || 1, 0.3);
     
