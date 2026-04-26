@@ -5,14 +5,10 @@ import Sidebar, { ViewType } from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import ThermalValidation from '@/components/ThermalValidation';
 import RecordsTable from '@/components/RecordsTable';
-import SafetyStandards from '@/components/SafetyStandards';
-import FullHistory from '@/components/FullHistory';
 import Settings from '@/components/Settings';
-import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
 import BatedoresDatabase from '@/components/BatedoresDatabase';
 import FoodSafetyGuide from '@/components/FoodSafetyGuide';
-import About from '@/components/About';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
@@ -45,39 +41,52 @@ const Index = () => {
 
   const handleSimulate = (batedor: any) => {
     setSelectedBatedor(batedor);
-    setCurrentView('dashboard');
+    setCurrentView('lab');
   };
 
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
         return (
-          <div className="space-y-10 animate-in fade-in duration-500">
+          <div className="space-y-10 animate-in fade-in duration-500 max-w-6xl mx-auto">
+            <header className="space-y-2">
+              <h1 className="text-4xl font-black text-white tracking-tight">Resumo de Atividades</h1>
+              <p className="text-slate-400 text-lg">Visão geral das validações térmicas e monitoramento.</p>
+            </header>
             <DashboardStats records={records} />
+            <div className="pt-8 border-t border-slate-900">
+              <RecordsTable records={records.slice(0, 10)} />
+            </div>
+          </div>
+        );
+      case 'lab':
+        return (
+          <div className="animate-in fade-in duration-500">
             <ThermalValidation 
               onRecordSaved={fetchRecords} 
               constants={thermalConstants}
               initialData={selectedBatedor}
             />
-            <div className="pt-8 border-t border-slate-900">
-              <RecordsTable records={records.slice(0, 5)} />
-            </div>
           </div>
         );
       case 'database':
-        return <BatedoresDatabase onSimulate={handleSimulate} />;
+        return (
+          <div className="animate-in fade-in duration-500 max-w-6xl mx-auto">
+            <BatedoresDatabase onSimulate={handleSimulate} />
+          </div>
+        );
       case 'safety_guide':
-        return <FoodSafetyGuide />;
-      case 'security':
-        return <SafetyStandards />;
-      case 'history':
-        return <FullHistory records={records} />;
-      case 'memorial':
-        return <TechnicalMemorial />;
-      case 'about':
-        return <About />;
+        return (
+          <div className="animate-in fade-in duration-500 max-w-6xl mx-auto">
+            <FoodSafetyGuide />
+          </div>
+        );
       case 'settings':
-        return <Settings constants={thermalConstants} onUpdate={setThermalConstants} />;
+        return (
+          <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
+            <Settings constants={thermalConstants} onUpdate={setThermalConstants} />
+          </div>
+        );
       default:
         return null;
     }
@@ -91,9 +100,9 @@ const Index = () => {
         <TopBar view={currentView} />
         
         <main className="flex-1 overflow-y-auto">
-          <div className={currentView === 'memorial' ? "" : "max-w-[1600px] mx-auto p-8 space-y-10"}>
+          <div className="p-12 space-y-12">
             {renderView()}
-            {currentView !== 'memorial' && <Footer />}
+            <Footer />
           </div>
         </main>
       </div>
