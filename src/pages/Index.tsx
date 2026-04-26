@@ -11,8 +11,8 @@ import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
 import BatedoresDatabase from '@/components/BatedoresDatabase';
 import About from '@/components/About';
+import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
@@ -90,20 +90,7 @@ const Index = () => {
       <main className="flex-1 overflow-y-auto">
         <div className={currentView === 'memorial' ? "" : "max-w-6xl mx-auto p-8 space-y-10"}>
           {renderView()}
-          
-          {currentView !== 'memorial' && (
-            <footer className="pt-10 border-t border-slate-900 flex flex-col items-center gap-4 pb-8">
-              <div className="text-center space-y-1">
-                <p className="text-[10px] md:text-xs text-slate-500 opacity-60">
-                  © 2026 AçaíThermal - Bacharelado em Ciência e Tecnologia - IFPA
-                </p>
-                <p className="text-[10px] text-slate-600 uppercase tracking-widest">
-                  Dante Monteiro • Thais Chagas • Edenilson do Carmo
-                </p>
-              </div>
-              <MadeWithDyad />
-            </footer>
-          )}
+          {currentView !== 'memorial' && <Footer />}
         </div>
       </main>
     </div>
