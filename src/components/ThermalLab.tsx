@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Thermometer, Zap, Timer, Activity } from 'lucide-react';
 
 interface ThermalLabProps {
@@ -14,42 +14,23 @@ interface ThermalLabProps {
 }
 
 const ThermalLab = ({ volume, material, temp, isSafe, k, q, timeToCritical }: ThermalLabProps) => {
-  // 1. Hooks at the top level
+  // 1. Hooks at the very top
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [offset, setOffset] = useState(0);
 
-  // Handle resizing and initial dimensions
+  // Animation loop
   useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight
-        });
-      }
-    };
-
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
-
-  // Animation Logic
-  useEffect(() => {
-    // 3. Safety Check: Ensure container and canvas exist
-    if (!canvasRef.current || dimensions.width === 0) return;
-
     const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let animationFrameId: number;
-    let offset = 0;
 
     const getLiquidColor = (t: number) => {
       if (t < 52.5) {
-        const ratio = (t - 25) / (52.5 - 25);
+        const ratio = Math.max(0, (t - 25) / (52.5 - 25));
         const r = Math.floor(59 + (234 - 59) * ratio);
         const g = Math.floor(130 + (179 - 130) * ratio);
         const b = Math.floor(246 + (37 - 246) * ratio);
@@ -63,142 +44,112 @@ const ThermalLab = ({ volume, material, temp, isSafe, k, q, timeToCritical }: Th
       }
     };
 
-    const draw = () => {
+    const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       const liquidColor = getLiquidColor(temp);
-      const fillHeight = Math.min(0.9, 0.2 + (volume / 50) * 0.7);
-      const rectHeight = canvas.height * fillHeight;
-      const startY = canvas.height - rectHeight;
+      const fillPercentage = Math.min(0.9, 0.2 + (volume / 50) * 0.7);
+      const h = canvas.height * fillPercentage;
+      const y = canvas.height - h;
 
-      // Draw Liquid
+      // Draw Liquid Rectangle (JavaLab Style)
       ctx.fillStyle = liquidColor;
+      ctx.fillRect(0, y, canvas.width, h);
+
+      // Simple Wave Overlay
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.beginPath();
-      ctx.moveTo(0, startY);
-      
-      // Wave effect
-      for (let x = 0; x <= canvas.width; x += 10) {
-        const y = startY + Math.sin(x * 0.05 + offset) * 3;
-        ctx.lineTo(x, y);
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= canvas.width; x += 20) {
+        ctx.lineTo(x, y + Math.sin(x * 0.05 + offset) * 5);
       }
-      
       ctx.lineTo(canvas.width, canvas.height);
       ctx.lineTo(0, canvas.height);
-      ctx.closePath();
       ctx.fill();
 
-      // Add some "bubbles" for heat effect
-      if (temp > 50) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        for (let i = 0; i < 5; i++) {
-          const bx = (Math.sin(offset + i) * 0.5 + 0.5) * canvas.width;
-          const by = canvas.height - ((offset * 50 + i * 100) % rectHeight);
-          ctx.beginPath();
-          ctx.arc(bx, by, 2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      offset += 0.05;
-      animationFrameId = requestAnimationFrame(draw);
+      animationFrameId = requestAnimationFrame(render);
     };
 
-    draw();
+    render();
     return () => cancelAnimationFrame(animationFrameId);
-  }, [dimensions, temp, volume]);
+  }, [temp, volume, offset]);
+
+  // Update offset for wave animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOffset(prev => prev + 0.1);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[450px] bg-slate-950 rounded-3xl border-2 border-slate-800 overflow-hidden font-mono shadow-2xl">
+    <div className="relative w-full h-[450px] bg-slate-950 rounded-3xl border-2 border-slate-800 overflow-hidden font-mono shadow-2xl">
       {/* Grid Background */}
       <div className="absolute inset-0 opacity-10" 
            style={{ backgroundImage: 'linear-gradient(#475569 1px, transparent 1px), linear-gradient(90deg, #475569 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
       {/* Physics HUD - Left */}
       <div className="absolute top-6 left-6 z-10 space-y-4">
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl w-56 shadow-lg">
-          <div className="flex items-center gap-2 text-blue-400 mb-2">
-            <Zap size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Troca de Energia (Q)</span>
+        <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 p-4 rounded-xl w-56">
+          <div className="flex items-center gap-2 text-blue-400 mb-1">
+            <Zap size={14} />
+            <span className="text-[10px] font-bold uppercase">Energia (Q)</span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {q.toLocaleString()} <span className="text-xs font-normal text-slate-500">J</span>
-          </div>
+          <div className="text-xl font-black text-white">{q.toLocaleString()} J</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl w-56 shadow-lg">
-          <div className="flex items-center gap-2 text-purple-400 mb-2">
-            <Activity size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Condutividade (k)</span>
+        <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 p-4 rounded-xl w-56">
+          <div className="flex items-center gap-2 text-purple-400 mb-1">
+            <Activity size={14} />
+            <span className="text-[10px] font-bold uppercase">Condutividade (k)</span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {k.toFixed(5)} <span className="text-xs font-normal text-slate-500">s⁻¹</span>
-          </div>
+          <div className="text-xl font-black text-white">{k.toFixed(5)} s⁻¹</div>
         </div>
       </div>
 
       {/* Physics HUD - Right */}
       <div className="absolute top-6 right-6 z-10 space-y-4">
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl w-56 shadow-lg">
-          <div className="flex items-center gap-2 text-amber-400 mb-2">
-            <Timer size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Timer de Inativação</span>
+        <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 p-4 rounded-xl w-56">
+          <div className="flex items-center gap-2 text-amber-400 mb-1">
+            <Timer size={14} />
+            <span className="text-[10px] font-bold uppercase">Inativação</span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {isSafe ? (600 - timeToCritical).toFixed(0) : "0"} <span className="text-xs font-normal text-slate-500">s</span>
+          <div className="text-xl font-black text-white">
+            {isSafe ? (600 - timeToCritical).toFixed(0) : "0"} s
           </div>
-          <div className="text-[9px] text-slate-500 mt-1">Tempo acima de 52.5°C</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-4 rounded-xl w-56 shadow-lg">
-          <div className="flex items-center gap-2 text-red-400 mb-2">
-            <Thermometer size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Temperatura Final</span>
+        <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 p-4 rounded-xl w-56">
+          <div className="flex items-center gap-2 text-red-400 mb-1">
+            <Thermometer size={14} />
+            <span className="text-[10px] font-bold uppercase">Temp. Final</span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {temp.toFixed(1)} <span className="text-xs font-normal text-slate-500">°C</span>
-          </div>
+          <div className="text-xl font-black text-white">{temp.toFixed(1)} °C</div>
         </div>
       </div>
 
       {/* 2D Schematic Container */}
-      <div className="absolute inset-0 flex items-center justify-center pt-20">
-        <div className="relative w-64 h-80">
-          {/* Container Walls */}
-          <div className={`absolute inset-0 border-x-4 border-b-4 rounded-b-3xl z-20 ${material === 'Metal' ? 'border-slate-400 bg-slate-400/10' : 'border-slate-600 bg-slate-600/10'}`}>
-            <canvas 
-              ref={canvasRef}
-              width={256}
-              height={320}
-              className="absolute inset-0 rounded-b-[20px]"
-            />
-            {/* Material Label */}
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">
-              Recipiente: {material === 'Metal' ? 'Aço Inox' : 'Polietileno'}
-            </div>
-          </div>
-
-          {/* Volume Indicator */}
-          <div className="absolute -left-12 top-0 bottom-0 flex flex-col justify-between py-4 text-[10px] text-slate-600 font-bold">
-            <span>50L</span>
-            <span>25L</span>
-            <span>0L</span>
+      <div className="absolute inset-0 flex items-center justify-center pt-16">
+        <div className="relative w-64 h-72 border-x-4 border-b-4 border-slate-700 rounded-b-3xl bg-slate-900/20">
+          <canvas 
+            ref={canvasRef}
+            width={256}
+            height={288}
+            className="absolute inset-0 rounded-b-[20px]"
+          />
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            Recipiente: {material}
           </div>
         </div>
       </div>
 
       {/* Bottom Status Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between px-8">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isSafe ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500 shadow-[0_0_10px_#ef4444]'}`} />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              Status: {isSafe ? 'Seguro' : 'Risco Biológico'}
-            </span>
-          </div>
+      <div className="absolute bottom-0 left-0 right-0 h-10 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-6">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${isSafe ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-[9px] font-bold text-slate-400 uppercase">Status: {isSafe ? 'Seguro' : 'Risco'}</span>
         </div>
-        <div className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
-          Simulação Física v2.0 | IFPA BCT
-        </div>
+        <div className="text-[8px] text-slate-600 font-bold uppercase">Simulação Física v2.1</div>
       </div>
     </div>
   );
