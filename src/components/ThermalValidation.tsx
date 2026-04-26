@@ -12,8 +12,9 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
-import { Info, Loader2, ShieldCheck } from 'lucide-react';
+import { Info, Loader2, ShieldCheck, TrendingUp } from 'lucide-react';
 import ThermalLab from './ThermalLab';
+import ThermalChart from './ThermalChart';
 import { showSuccess, showError } from '@/utils/toast';
 import { supabase } from '@/lib/supabase';
 
@@ -169,6 +170,8 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
             </Dialog>
           </div>
         </Card>
+
+        <ThermalChart k={currentPhysics.k} isSafe={currentPhysics.isSafe} />
       </div>
 
       <div className="col-span-12 lg:col-span-8">

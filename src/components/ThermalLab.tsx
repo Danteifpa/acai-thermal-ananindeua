@@ -65,7 +65,14 @@ const ThermalLab = ({
 }: ThermalLabProps) => {
   const deltaT = Math.abs(temp - 80).toFixed(1);
   const specificHeat = material === 'Metal' ? 0.50 : 2.30;
-  const particleSpeed = useMemo(() => 1 + (temp / 20), [temp]);
+  
+  // PhET Logic: Speed scales with temperature (Kinetic Theory of Gases/Liquids)
+  const particleSpeed = useMemo(() => {
+    const baseSpeed = 0.5;
+    const thermalFactor = (temp - 25) / 55; // Normalized 25-80 range
+    return baseSpeed + (thermalFactor * 4);
+  }, [temp]);
+
   const particleCount = 40;
 
   const getLiquidColor = () => {
@@ -87,17 +94,17 @@ const ThermalLab = ({
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-500 uppercase">ΔT (Variação)</p>
-            <p className="text-2xl font-black text-slate-900">{deltaT}°C</p>
+            <p className="text-2xl font-black text-slate-900 font-mono">{deltaT}°C</p>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-500 uppercase">Calor Específico (c)</p>
-            <p className="text-2xl font-black text-[#1E562F]">{specificHeat.toFixed(2)} <span className="text-[10px] text-slate-500">kJ/kg·K</span></p>
+            <p className="text-2xl font-black text-[#1E562F] font-mono">{specificHeat.toFixed(2)} <span className="text-[10px] text-slate-500">kJ/kg·K</span></p>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-500 uppercase">Energia (Q)</p>
-            <p className="text-2xl font-black text-orange-600">{Math.floor(q).toLocaleString()} <span className="text-[10px] text-slate-500">J</span></p>
+            <p className="text-2xl font-black text-orange-600 font-mono">{Math.floor(q).toLocaleString()} <span className="text-[10px] text-slate-500">J</span></p>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
@@ -111,7 +118,7 @@ const ThermalLab = ({
           </div>
         </div>
 
-        {/* Controles de Bancada - Overhauled */}
+        {/* Controles de Bancada */}
         <div className="mt-auto pt-6 border-t border-slate-200 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-[#1E562F]">
@@ -189,7 +196,7 @@ const ThermalLab = ({
             <div className="flex flex-col items-center">
               <div className="w-12 h-48 bg-white rounded-full border-4 border-slate-300 relative flex flex-col items-center py-4 shadow-2xl">
                 <div className="bg-slate-900 px-2 py-1 rounded border border-slate-800 mb-4">
-                  <span className="text-[10px] font-black text-emerald-400">{temp.toFixed(1)}°</span>
+                  <span className="text-[10px] font-black text-emerald-400 font-mono">{temp.toFixed(1)}°</span>
                 </div>
                 <div className="w-2 flex-1 bg-slate-100 rounded-full relative overflow-hidden">
                   <div 
