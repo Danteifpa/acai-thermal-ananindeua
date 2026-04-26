@@ -29,7 +29,6 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
       setNomeBatedouro(initialData.nome || '');
       setVolume(initialData.volume_padrao || 20);
       setMaterial(initialData.material_padrao || 'Plástico');
-      showSuccess(`Parâmetros de ${initialData.nome} carregados.`);
     }
   }, [initialData]);
 
@@ -38,8 +37,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
     Plástico: 2.30
   };
 
-  // Physics Constants for HUD
-  const C_ACAI = 4000; // J/(kg*K) - Approximate specific heat of acai pulp
+  const C_ACAI = 4000;
   const T0 = 80;
   const TENV = 25;
 
@@ -47,15 +45,8 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
     const cp = material === 'Metal' ? SPECIFIC_HEAT.Metal : SPECIFIC_HEAT.Plástico;
     const baseK = material === 'Metal' ? constants.metal : constants.plastic;
     const k = baseK / (cp * Math.pow(volume || 1, 0.2));
-    
     const finalTemp = TENV + (T0 - TENV) * Math.exp(-k * 600);
-    
-    // Energy Exchange Q = m * c * deltaT
-    // Assuming density 1kg/L
     const q = volume * C_ACAI * (T0 - finalTemp);
-    
-    // Time to reach 52.5C
-    // 52.5 = 25 + 55 * exp(-kt) -> 27.5/55 = exp(-kt) -> 0.5 = exp(-kt) -> t = -ln(0.5)/k
     const timeToCritical = Math.log(0.5) / -k;
 
     return {
@@ -93,8 +84,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
         }]);
 
       if (error) throw error;
-      
-      showSuccess("Dados científicos persistidos com sucesso.");
+      showSuccess("Dados científicos persistidos.");
       onRecordSaved();
       setNomeBatedouro('');
     } catch (err: any) {
@@ -169,6 +159,8 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
           k={physicsValues.k}
           q={physicsValues.q}
           timeToCritical={physicsValues.timeToCritical}
+          onMaterialChange={setMaterial}
+          onVolumeChange={setVolume}
         />
         
         <ImpactComparison 
