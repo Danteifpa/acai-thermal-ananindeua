@@ -1,30 +1,40 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Trophy, RefreshCcw, CheckCircle2, XCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { showSuccess } from '@/utils/toast';
 
 const ChallengeMode = () => {
-  const [challenge, setChallenge] = useState({ volume: 15, target: 'Metal' });
+  const [challenge, setChallenge] = useState({ volume: 15, material: 'Plástico' });
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
 
   const generateChallenge = () => {
-    const volumes = [10, 20, 30, 40, 50];
+    const volumes = [10, 15, 20, 25, 30, 40, 50];
     const materials = ['Metal', 'Plástico'];
     setChallenge({
       volume: volumes[Math.floor(Math.random() * volumes.length)],
-      target: materials[Math.floor(Math.random() * materials.length)]
+      material: materials[Math.floor(Math.random() * materials.length)]
     });
     setFeedback('none');
   };
 
-  const checkAnswer = (isSafe: boolean) => {
-    // Simple logic for the game: Metal is usually safer for larger volumes
-    const correct = challenge.volume <= 25 || challenge.target === 'Metal';
-    if (correct === isSafe) {
+  useEffect(() => {
+    generateChallenge();
+  }, []);
+
+  const checkAnswer = (userGuessSafe: boolean) => {
+    // Core Thermal Physics Logic
+    const T0 = 80;
+    const TENV = 25;
+    const cp = challenge.material === 'Metal' ? 0.50 : 2.30;
+    const baseK = challenge.material === 'Metal' ? 0.004 : 0.0015;
+    const k = baseK / (cp * Math.pow(challenge.volume, 0.2));
+    const finalTemp = TENV + (T0 - TENV) * Math.exp(-k * 600);
+    const isActuallySafe = finalTemp >= 52.5;
+
+    if (userGuessSafe === isActuallySafe) {
       setScore(s => s + 10);
       setFeedback('correct');
       showSuccess("Cálculo Mental Correto!");
@@ -34,47 +44,60 @@ const ChallengeMode = () => {
   };
 
   return (
-    <Card className="bg-slate-900 border-slate-800 p-6 space-y-6 relative overflow-hidden">
+    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-4 relative overflow-hidden">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-amber-400">
-          <Trophy size={20} />
-          <h3 className="font-black uppercase tracking-wider text-sm">Desafio BCT</h3>
+          <Trophy size={16} />
+          <h3 className="font-black uppercase tracking-wider text-[10px]">Desafio BCT</h3>
         </div>
-        <div className="text-white font-mono font-bold">Score: {score}</div>
+        <div className="text-amber-400 font-mono font-bold text-xs">Score: {score}</div>
       </div>
 
-      <div className="bg-slate-950 rounded-xl p-6 text-center space-y-4 border border-slate-800">
-        <p className="text-slate-400 text-xs uppercase font-bold">Cenário Experimental</p>
-        <div className="text-2xl font-black text-white">
-          {challenge.volume}L em {challenge.target}
+      <div className="bg-slate-950/50 rounded-lg p-3 text-center space-y-2 border border-slate-800/50">
+        <p className="text-slate-500 text-[9px] uppercase font-bold">Cenário Experimental</p>
+        <div className="text-sm font-black text-white">
+          {challenge.volume}L em {challenge.material}
         </div>
-        <p className="text-sm text-slate-500">Este processo será seguro após 10 min?</p>
+        <p className="text-[10px] text-slate-400 leading-tight">Seguro após 10 min?</p>
       </div>
 
-      <div className="flex gap-4">
-        <Button 
+      <div className="flex gap-2">
+        <button 
           onClick={() => checkAnswer(true)}
-          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold h-12 rounded-xl"
+          className="flex-1 bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white border border-green-600/20 text-[10px] font-bold py-2 rounded-lg transition-all"
         >
-          Sim, Seguro
-        </Button>
-        <Button 
+          Sim
+        </button>
+        <button 
           onClick={() => checkAnswer(false)}
-          className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold h-12 rounded-xl"
+          className="flex-1 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 text-[10px] font-bold py-2 rounded-lg transition-all"
         >
-          Não, Risco
-        </Button>
+          Não
+        </button>
       </div>
 
       {feedback !== 'none' && (
         <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md transition-all ${feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-          {feedback === 'correct' ? <CheckCircle2 className="text-green-500 mb-2" size={48} /> : <XCircle className="text-red-500 mb-2" size={48} />}
-          <Button onClick={generateChallenge} variant="outline" className="bg-slate-900 border-slate-700 text-white gap-2">
-            <RefreshCcw size={16} /> Próximo Desafio
-          </Button>
+          {feedback === 'correct' ? (
+            <div className="flex flex-col items-center gap-2">
+              <CheckCircle2 className="text-green-500" size={32} />
+              <span className="text-[10px] font-black text-green-500 uppercase">Acertou!</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <XCircle className="text-red-500" size={32} />
+              <span className="text-[10px] font-black text-red-500 uppercase">Errou!</span>
+            </div>
+          )}
+          <button 
+            onClick={generateChallenge}
+            className="mt-2 bg-slate-900 border border-slate-700 text-white p-1.5 rounded-full hover:bg-slate-800 transition-colors"
+          >
+            <RefreshCcw size={14} />
+          </button>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 
