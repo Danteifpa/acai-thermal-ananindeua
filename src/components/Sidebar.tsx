@@ -28,11 +28,11 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   ];
 
   return (
-    <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0">
+    <div className="w-64 bg-[#32a041] flex flex-col h-screen sticky top-0 shadow-xl z-50">
       <div className="p-8">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-600/20">
-            <Thermometer className="text-white" size={24} />
+          <div className="bg-white p-2 rounded-xl shadow-lg">
+            <Thermometer className="text-[#32a041]" size={24} />
           </div>
           <h1 className="text-xl font-black text-white tracking-tighter">AçaíThermal</h1>
         </div>
@@ -44,10 +44,10 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
             key={item.id}
             onClick={() => onViewChange(item.id)}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium text-sm",
+              "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-sm",
               currentView === item.id 
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                ? "bg-white text-[#32a041] shadow-lg" 
+                : "text-white/80 hover:bg-white/10 hover:text-white"
             )}
           >
             <item.icon size={18} />
@@ -56,8 +56,8 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
         ))}
       </nav>
 
-      <div className="p-8 border-t border-slate-800 text-center">
-        <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">BCT / IFPA 2026</p>
+      <div className="p-8 border-t border-white/10 text-center">
+        <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">BCT / IFPA 2026</p>
       </div>
     </div>
   );

@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Thermometer, 
-  Droplets, 
-  Flame, 
   Info, 
   Box, 
-  FlaskConical
+  FlaskConical,
+  Flame,
+  Droplets
 } from 'lucide-react';
 
 interface ThermalLabProps {
@@ -47,13 +46,6 @@ const Particle = ({ containerWidth, containerHeight, speed }: { containerWidth: 
     return () => clearInterval(interval);
   }, [vel, containerWidth, containerHeight]);
 
-  useEffect(() => {
-    setVel(v => ({
-      x: (v.x / (Math.abs(v.x) || 1)) * (Math.random() * speed),
-      y: (v.y / (Math.abs(v.y) || 1)) * (Math.random() * speed)
-    }));
-  }, [speed]);
-
   return (
     <div 
       className="absolute w-1 h-1 bg-white/60 rounded-full"
@@ -69,8 +61,7 @@ const ThermalLab = ({
   isSafe, 
   k, 
   q,
-  onMaterialChange,
-  onVolumeChange
+  onMaterialChange
 }: ThermalLabProps) => {
   const deltaT = Math.abs(temp - 80).toFixed(1);
   const specificHeat = material === 'Metal' ? 0.50 : 2.30;
@@ -78,8 +69,8 @@ const ThermalLab = ({
   const particleCount = 40;
 
   const getLiquidColor = () => {
-    if (temp > 70) return 'bg-red-500/80';
-    if (temp > 52.5) return 'bg-purple-600/80';
+    if (temp > 70) return 'bg-[#e41b13]/80'; // IFPA Red
+    if (temp > 52.5) return 'bg-[#32a041]/80'; // IFPA Green
     return 'bg-blue-500/80';
   };
 
@@ -89,7 +80,7 @@ const ThermalLab = ({
       {/* Scientific HUD - Left Side */}
       <div className="w-72 bg-slate-50 border-r border-slate-200 p-6 flex flex-col gap-6 z-20">
         <div className="space-y-1">
-          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Painel de Dados</h3>
+          <h3 className="text-[10px] font-black text-[#32a041] uppercase tracking-widest">Painel de Dados</h3>
           <p className="text-xs text-slate-500">Termodinâmica em Tempo Real</p>
         </div>
 
@@ -101,19 +92,19 @@ const ThermalLab = ({
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-400 uppercase">Calor Específico (c)</p>
-            <p className="text-2xl font-black text-blue-600">{specificHeat.toFixed(2)} <span className="text-[10px] text-slate-400">kJ/kg·K</span></p>
+            <p className="text-2xl font-black text-[#32a041]">{specificHeat.toFixed(2)} <span className="text-[10px] text-slate-400">kJ/kg·K</span></p>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-400 uppercase">Energia (Q)</p>
-            <p className="text-2xl font-black text-amber-500">{Math.floor(q).toLocaleString()} <span className="text-[10px] text-slate-400">J</span></p>
+            <p className="text-2xl font-black text-orange-500">{Math.floor(q).toLocaleString()} <span className="text-[10px] text-slate-400">J</span></p>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 shadow-sm">
             <p className="text-[9px] font-bold text-slate-400 uppercase">Status Biológico</p>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${isSafe ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-              <span className={`text-sm font-bold ${isSafe ? 'text-green-600' : 'text-red-600'}`}>
+              <div className={`w-2 h-2 rounded-full ${isSafe ? 'bg-[#32a041] animate-pulse' : 'bg-[#e41b13]'}`} />
+              <span className={`text-sm font-bold ${isSafe ? 'text-[#32a041]' : 'text-[#e41b13]'}`}>
                 {isSafe ? 'INATIVADO' : 'RISCO ATIVO'}
               </span>
             </div>
@@ -128,14 +119,14 @@ const ThermalLab = ({
           <div className="grid grid-cols-2 gap-2">
             <button 
               onClick={() => onMaterialChange('Metal')}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Metal' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Metal' ? 'bg-[#32a041] border-[#32a041] text-white shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
             >
               <FlaskConical size={20} />
               <span className="text-[8px] font-bold uppercase">Inox</span>
             </button>
             <button 
               onClick={() => onMaterialChange('Plástico')}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Plástico' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Plástico' ? 'bg-[#32a041] border-[#32a041] text-white shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
             >
               <Box size={20} />
               <span className="text-[8px] font-bold uppercase">Polímero</span>
@@ -151,20 +142,12 @@ const ThermalLab = ({
         />
 
         <div className="absolute top-8 left-8 flex gap-4 z-30">
-          <motion.div 
-            drag 
-            dragConstraints={{ left: 0, right: 400, top: 0, bottom: 400 }}
-            className="w-14 h-14 bg-orange-50 border-2 border-orange-200 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sm"
-          >
+          <div className="w-14 h-14 bg-orange-50 border-2 border-orange-200 rounded-2xl flex items-center justify-center shadow-sm">
             <Flame className="text-orange-500" size={28} />
-          </motion.div>
-          <motion.div 
-            drag 
-            dragConstraints={{ left: 0, right: 400, top: 0, bottom: 400 }}
-            className="w-14 h-14 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sm"
-          >
+          </div>
+          <div className="w-14 h-14 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-center shadow-sm">
             <Droplets className="text-blue-500" size={28} />
-          </motion.div>
+          </div>
         </div>
 
         <div className="relative group">
@@ -182,11 +165,7 @@ const ThermalLab = ({
             </div>
           </div>
 
-          <motion.div 
-            drag
-            dragConstraints={{ left: -150, right: 150, top: -100, bottom: 250 }}
-            className="absolute -top-20 left-1/2 -translate-x-1/2 z-40 cursor-grab active:cursor-grabbing"
-          >
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-40">
             <div className="flex flex-col items-center">
               <div className="w-12 h-48 bg-white rounded-full border-4 border-slate-200 relative flex flex-col items-center py-4 shadow-xl">
                 <div className="bg-slate-900 px-2 py-1 rounded border border-slate-800 mb-4">
@@ -194,7 +173,7 @@ const ThermalLab = ({
                 </div>
                 <div className="w-2 flex-1 bg-slate-100 rounded-full relative overflow-hidden">
                   <div 
-                    className={`absolute bottom-0 left-0 right-0 transition-all duration-500 ${temp > 52.5 ? 'bg-red-500' : 'bg-blue-500'}`}
+                    className={`absolute bottom-0 left-0 right-0 transition-all duration-500 ${temp > 52.5 ? 'bg-[#e41b13]' : 'bg-[#32a041]'}`}
                     style={{ height: `${((temp - 25) / 55) * 100}%` }}
                   />
                 </div>
@@ -202,7 +181,7 @@ const ThermalLab = ({
               <div className="w-1 h-20 bg-slate-300" />
               <div className="w-4 h-4 bg-slate-300 rounded-full shadow-md" />
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <div className="absolute bottom-6 right-8 text-right">

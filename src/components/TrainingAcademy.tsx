@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
   Trophy, 
-  Medal, 
   ShieldCheck, 
   Brain, 
   CheckCircle2, 
@@ -82,13 +81,12 @@ const TrainingAcademy = () => {
       </header>
 
       <div className="grid grid-cols-12 gap-8">
-        {/* Progress & Badges */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
           <Card className="p-6 space-y-6 shadow-sm border-slate-200">
             <div className="space-y-2">
               <div className="flex justify-between items-end">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progresso de Aprendizado</p>
-                <span className="text-blue-600 font-black">{progress}%</span>
+                <span className="text-[#32a041] font-black">{progress}%</span>
               </div>
               <Progress value={progress} className="h-2 bg-slate-100" />
             </div>
@@ -97,7 +95,7 @@ const TrainingAcademy = () => {
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Medalhas Conquistadas</p>
               <div className="grid grid-cols-3 gap-2">
                 {['Guardião Sanitário', 'Mestre da Termodinâmica', 'Especialista BCT'].map((b) => (
-                  <div key={b} className={`flex flex-col items-center gap-2 p-2 rounded-xl border transition-all ${badges.includes(b) ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>
+                  <div key={b} className={`flex flex-col items-center gap-2 p-2 rounded-xl border transition-all ${badges.includes(b) ? 'bg-emerald-50 border-[#32a041]/20 text-[#32a041]' : 'bg-slate-50 border-slate-100 text-slate-300'}`}>
                     {b === 'Guardião Sanitário' ? <ShieldCheck size={24} /> : b === 'Mestre da Termodinâmica' ? <Brain size={24} /> : <Trophy size={24} />}
                     <span className="text-[8px] font-bold text-center leading-tight">{b}</span>
                   </div>
@@ -114,12 +112,11 @@ const TrainingAcademy = () => {
           </Card>
         </div>
 
-        {/* Challenge Area */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
           <Card className="p-8 space-y-8 shadow-sm border-slate-200 relative overflow-hidden">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-600 p-2 rounded-lg">
+                <div className="bg-[#32a041] p-2 rounded-lg">
                   <Star className="text-white" size={20} />
                 </div>
                 <div>
@@ -134,7 +131,7 @@ const TrainingAcademy = () => {
                     variant={level === l ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setLevel(l)}
-                    className={level === l ? 'bg-blue-600' : 'text-slate-500 border-slate-200'}
+                    className={level === l ? 'bg-[#32a041] hover:bg-[#288034]' : 'text-slate-500 border-slate-200'}
                   >
                     {l}
                   </Button>
@@ -146,7 +143,7 @@ const TrainingAcademy = () => {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Cenário Experimental</p>
               <div className="space-y-2">
                 <h2 className="text-5xl font-black text-slate-900">{challenge.volume} Litros</h2>
-                <p className="text-xl text-blue-600 font-bold">Recipiente de {challenge.material}</p>
+                <p className="text-xl text-[#32a041] font-bold">Recipiente de {challenge.material}</p>
               </div>
               <p className="text-slate-500 max-w-md mx-auto">
                 Considerando o tempo de branqueamento de 10 minutos, este processo é considerado <span className="font-bold text-slate-900">SEGURO</span> para consumo?
@@ -156,30 +153,30 @@ const TrainingAcademy = () => {
             <div className="grid grid-cols-2 gap-4">
               <Button 
                 onClick={() => checkAnswer(true)}
-                className="h-20 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20"
+                className="h-20 rounded-2xl bg-[#32a041] hover:bg-[#288034] text-white text-lg font-black uppercase tracking-widest shadow-lg shadow-[#32a041]/20"
               >
                 Sim, Seguro
               </Button>
               <Button 
                 onClick={() => checkAnswer(false)}
-                className="h-20 rounded-2xl bg-red-600 hover:bg-red-700 text-white text-lg font-black uppercase tracking-widest shadow-lg shadow-red-600/20"
+                className="h-20 rounded-2xl bg-[#e41b13] hover:bg-[#c41710] text-white text-lg font-black uppercase tracking-widest shadow-lg shadow-[#e41b13]/20"
               >
                 Não, Risco
               </Button>
             </div>
 
             {feedback !== 'none' && (
-              <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md transition-all z-50 ${feedback === 'correct' ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
+              <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md transition-all z-50 ${feedback === 'correct' ? 'bg-[#32a041]/10' : 'bg-[#e41b13]/10'}`}>
                 <div className="bg-white p-8 rounded-3xl shadow-2xl border border-slate-100 flex flex-col items-center gap-4 animate-in zoom-in duration-300">
                   {feedback === 'correct' ? (
                     <>
-                      <CheckCircle2 className="text-emerald-500" size={64} />
+                      <CheckCircle2 className="text-[#32a041]" size={64} />
                       <h3 className="text-2xl font-black text-slate-900">Cálculo Correto!</h3>
                       <p className="text-slate-500 text-center">Você demonstrou domínio sobre os parâmetros térmicos deste cenário.</p>
                     </>
                   ) : (
                     <>
-                      <XCircle className="text-red-500" size={64} />
+                      <XCircle className="text-[#e41b13]" size={64} />
                       <h3 className="text-2xl font-black text-slate-900">Erro de Análise</h3>
                       <p className="text-slate-500 text-center">Revise a Lei do Resfriamento de Newton no Memorial Acadêmico.</p>
                     </>
