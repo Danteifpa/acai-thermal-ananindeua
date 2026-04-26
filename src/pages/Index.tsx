@@ -7,7 +7,7 @@ import ThermalValidation from '@/components/ThermalValidation';
 import DashboardStats from '@/components/DashboardStats';
 import FieldManagement from '@/components/FieldManagement';
 import SafetyProtocols from '@/components/SafetyProtocols';
-import TechnicalMemorial from '@/components/TechnicalMemorial';
+import TrainingAcademy from '@/components/TrainingAcademy';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
@@ -84,10 +84,10 @@ const Index = () => {
             <SafetyProtocols />
           </div>
         );
-      case 'memorial':
+      case 'academy':
         return (
           <div className="animate-in fade-in duration-500">
-            <TechnicalMemorial />
+            <TrainingAcademy />
           </div>
         );
       default:
