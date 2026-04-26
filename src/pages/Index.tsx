@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar, { ViewType } from '@/components/Sidebar';
+import TopBar from '@/components/TopBar';
 import ThermalValidation from '@/components/ThermalValidation';
 import RecordsTable from '@/components/RecordsTable';
 import SafetyStandards from '@/components/SafetyStandards';
@@ -52,26 +53,15 @@ const Index = () => {
       case 'dashboard':
         return (
           <div className="space-y-10 animate-in fade-in duration-500">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-              <div className="flex flex-col gap-1">
-                <h1 className="text-4xl font-black text-white tracking-tight">AçaíThermal</h1>
-                <p className="text-slate-400 text-lg">Scientific Dashboard • IFPA Ananindeua</p>
-                <div className="flex gap-2 mt-2">
-                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Dante Monteiro</span>
-                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Thais Chagas</span>
-                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Edenilson do Carmo</span>
-                </div>
-              </div>
-            </header>
-            
             <DashboardStats records={records} />
-            
             <ThermalValidation 
               onRecordSaved={fetchRecords} 
               constants={thermalConstants}
               initialData={selectedBatedor}
             />
-            <RecordsTable records={records.slice(0, 5)} />
+            <div className="pt-8 border-t border-slate-900">
+              <RecordsTable records={records.slice(0, 5)} />
+            </div>
           </div>
         );
       case 'database':
@@ -94,15 +84,19 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200 font-sans">
+    <div className="flex min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-purple-500/30">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
       
-      <main className="flex-1 overflow-y-auto">
-        <div className={currentView === 'memorial' ? "" : "max-w-6xl mx-auto p-8 space-y-10"}>
-          {renderView()}
-          {currentView !== 'memorial' && <Footer />}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar view={currentView} />
+        
+        <main className="flex-1 overflow-y-auto">
+          <div className={currentView === 'memorial' ? "" : "max-w-[1600px] mx-auto p-8 space-y-10"}>
+            {renderView()}
+            {currentView !== 'memorial' && <Footer />}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
