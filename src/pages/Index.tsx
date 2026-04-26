@@ -10,6 +10,7 @@ import Settings from '@/components/Settings';
 import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
 import BatedoresDatabase from '@/components/BatedoresDatabase';
+import ChallengeMode from '@/components/ChallengeMode';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
@@ -51,9 +52,19 @@ const Index = () => {
       case 'dashboard':
         return (
           <div className="space-y-10 animate-in fade-in duration-500">
-            <header className="flex flex-col gap-1">
-              <h1 className="text-4xl font-black text-white tracking-tight">AçaíThermal</h1>
-              <p className="text-slate-400 text-lg">Sistema Inteligente de Validação Térmica</p>
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+              <div className="flex flex-col gap-1">
+                <h1 className="text-4xl font-black text-white tracking-tight">AçaíThermal</h1>
+                <p className="text-slate-400 text-lg">Scientific Dashboard • IFPA Ananindeua</p>
+                <div className="flex gap-2 mt-2">
+                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Dante Monteiro</span>
+                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Thais Chagas</span>
+                  <span className="text-[10px] font-bold text-purple-400 uppercase bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20">Edenilson do Carmo</span>
+                </div>
+              </div>
+              <div className="w-full md:w-72">
+                <ChallengeMode />
+              </div>
             </header>
             
             <DashboardStats records={records} />
