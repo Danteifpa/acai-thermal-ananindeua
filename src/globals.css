@@ -60,3 +60,40 @@
     @apply bg-[#1E562F] hover:bg-[#164023] text-white shadow-lg shadow-[#1E562F]/10 active:scale-[0.98] transition-all;
   }
 }
+
+/* Custom Micro-Animations */
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes bobbing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes rotate-once {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.group:hover .animate-bobbing-hover {
+  animation: bobbing 1.5s ease-in-out infinite;
+}
+
+.group:hover .animate-bounce-hover {
+  animation: bounce-subtle 0.6s ease-in-out;
+}
+
+.group:hover .animate-rotate-hover {
+  animation: rotate-once 1s ease-in-out;
+}
