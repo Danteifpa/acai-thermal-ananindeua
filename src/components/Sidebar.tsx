@@ -2,13 +2,12 @@
 
 import React from 'react';
 import { 
-  PalmTree, 
+  Trees, 
   Waves, 
   MapPin, 
   ShieldAlert, 
   GraduationCap,
-  Thermometer,
-  Package
+  Thermometer
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -23,7 +22,7 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { 
       id: 'home' as ViewType, 
-      icon: PalmTree, 
+      icon: Trees, 
       label: 'Início',
       iconClass: (active: boolean) => active ? "animate-pulse-soft" : ""
     },
