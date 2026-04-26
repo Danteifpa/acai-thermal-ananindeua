@@ -10,8 +10,8 @@ const Footer = () => {
         <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
           Bacharelado em Ciência e Tecnologia - IFPA Campus Ananindeua | 2026
         </p>
-        <p className="text-sm text-slate-700 font-medium">
-          Dante Monteiro • Thais Chagas • Edenilson do Carmo
+        <p className="text-sm text-slate-800 font-bold">
+          Dante • Thais • Edenilson
         </p>
         <p className="text-[10px] text-slate-400 opacity-60">
           © 2026 AçaíThermal - Projeto Acadêmico

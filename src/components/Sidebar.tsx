@@ -28,17 +28,17 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   ];
 
   return (
-    <div className="w-64 bg-[#32a041] flex flex-col h-screen sticky top-0 shadow-xl z-50">
+    <div className="w-64 bg-[#1E562F] flex flex-col h-screen sticky top-0 shadow-2xl z-50">
       <div className="p-8">
         <div className="flex items-center gap-3">
           <div className="bg-white p-2 rounded-xl shadow-lg">
-            <Thermometer className="text-[#32a041]" size={24} />
+            <Thermometer className="text-[#1E562F]" size={24} />
           </div>
           <h1 className="text-xl font-black text-white tracking-tighter">AçaíThermal</h1>
         </div>
       </div>
       
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-4 space-y-2">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -46,8 +46,8 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
             className={cn(
               "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-sm",
               currentView === item.id 
-                ? "bg-white text-[#32a041] shadow-lg" 
-                : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "bg-white text-[#1E562F] shadow-xl" 
+                : "text-white/90 hover:bg-white/10 hover:text-white"
             )}
           >
             <item.icon size={18} />
