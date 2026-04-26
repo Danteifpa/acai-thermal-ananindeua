@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Users, GraduationCap, Info } from 'lucide-react';
