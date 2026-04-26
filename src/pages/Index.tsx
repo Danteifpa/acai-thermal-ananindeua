@@ -17,6 +17,7 @@ import { MadeWithDyad } from "@/components/made-with-dyad";
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [records, setRecords] = useState([]);
+  const [selectedBatedor, setSelectedBatedor] = useState<any>(null);
   const [thermalConstants, setThermalConstants] = useState({
     metal: 0.004,
     plastic: 0.0015
@@ -40,6 +41,11 @@ const Index = () => {
     fetchRecords();
   }, [fetchRecords]);
 
+  const handleSimulate = (batedor: any) => {
+    setSelectedBatedor(batedor);
+    setCurrentView('dashboard');
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -55,12 +61,13 @@ const Index = () => {
             <ThermalValidation 
               onRecordSaved={fetchRecords} 
               constants={thermalConstants}
+              initialData={selectedBatedor}
             />
             <RecordsTable records={records.slice(0, 5)} />
           </div>
         );
       case 'database':
-        return <BatedoresDatabase />;
+        return <BatedoresDatabase onSimulate={handleSimulate} />;
       case 'security':
         return <SafetyStandards />;
       case 'history':
@@ -86,9 +93,14 @@ const Index = () => {
           
           {currentView !== 'memorial' && (
             <footer className="pt-10 border-t border-slate-900 flex flex-col items-center gap-4 pb-8">
-              <p className="text-[10px] md:text-xs text-slate-500 opacity-60 text-center px-4">
-                © 2026 AçaíThermal - Desenvolvido por Dante Monteiro, Thais Chagas e Edenilson do Carmo.
-              </p>
+              <div className="text-center space-y-1">
+                <p className="text-[10px] md:text-xs text-slate-500 opacity-60">
+                  © 2026 AçaíThermal - Bacharelado em Ciência e Tecnologia - IFPA
+                </p>
+                <p className="text-[10px] text-slate-600 uppercase tracking-widest">
+                  Dante Monteiro • Thais Chagas • Edenilson do Carmo
+                </p>
+              </div>
               <MadeWithDyad />
             </footer>
           )}

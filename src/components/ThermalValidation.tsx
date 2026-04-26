@@ -1,29 +1,38 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, AlertTriangle, Save, Loader2, Lightbulb, PlayCircle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Save, Loader2, PlayCircle } from 'lucide-react';
 import ThermalChart from './ThermalChart';
 import ImpactComparison from './ImpactComparison';
 import { showSuccess, showError } from '@/utils/toast';
 import { supabase } from '@/lib/supabase';
-import { Progress } from "@/components/ui/progress";
-import { batedoresData } from '@/data/batedores';
 
 interface ThermalValidationProps {
   onRecordSaved: () => void;
   constants: { metal: number; plastic: number };
+  initialData?: any;
 }
 
-const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps) => {
+const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalValidationProps) => {
   const [nomeBatedouro, setNomeBatedouro] = useState('');
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Pre-fill if initialData is provided
+  useEffect(() => {
+    if (initialData) {
+      setNomeBatedouro(initialData.nome || '');
+      setVolume(initialData.volume_padrao || 20);
+      setMaterial(initialData.material_padrao || 'Plástico');
+      showSuccess(`Parâmetros de ${initialData.nome} carregados.`);
+    }
+  }, [initialData]);
 
   const SPECIFIC_HEAT = {
     Metal: 0.50,
@@ -34,7 +43,7 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
     const T0 = 80; 
     const Tenv = 25; 
     const cp = mat === 'Metal' ? SPECIFIC_HEAT.Metal : SPECIFIC_HEAT.Plástico;
-    const baseK = 0.005; 
+    const baseK = mat === 'Metal' ? constants.metal : constants.plastic;
     const k = baseK / (cp * Math.pow(vol || 1, 0.2));
     return Tenv + (T0 - Tenv) * Math.exp(-k * 600);
   };
@@ -44,7 +53,7 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
     const Tenv = 25; 
     const timeSteps = 60; 
     const cp = material === 'Metal' ? SPECIFIC_HEAT.Metal : SPECIFIC_HEAT.Plástico;
-    const baseK = 0.005; 
+    const baseK = material === 'Metal' ? constants.metal : constants.plastic;
     const k = baseK / (cp * Math.pow(volume || 1, 0.2));
     
     const data = [];
@@ -54,23 +63,12 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
       data.push({ time: t, temp: parseFloat(temp.toFixed(1)) });
     }
     return data;
-  }, [volume, material]);
+  }, [volume, material, constants]);
 
   const finalTemp = simulationData[simulationData.length - 1].temp;
   const isSafe = finalTemp >= 52.5;
 
-  // Optimized parameters for comparison
-  const optimizedTemp = useMemo(() => calculateTemp(volume + 10, 'Metal'), [volume]);
-
-  const handleDemo = (batedorId: string) => {
-    const batedor = batedoresData.find(b => b.id === batedorId);
-    if (batedor) {
-      setNomeBatedouro(batedor.nome);
-      setVolume(batedor.volume_atual);
-      setMaterial(batedor.material_atual);
-      showSuccess(`Parâmetros de ${batedor.nome} carregados.`);
-    }
-  };
+  const optimizedTemp = useMemo(() => calculateTemp(volume + 10, 'Metal'), [volume, constants]);
 
   const handleSave = async () => {
     if (!nomeBatedouro.trim()) {
@@ -80,8 +78,7 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
 
     setIsSaving(true);
     try {
-      // Save to main table
-      const { error: mainError } = await supabase
+      const { error } = await supabase
         .from('amostras_termicas')
         .insert([{ 
           nome_batedouro: nomeBatedouro, 
@@ -91,19 +88,7 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
           status_sanitario: isSafe ? 'Processo Seguro' : 'Risco Biológico' 
         }]);
 
-      if (mainError) throw mainError;
-
-      // Save to demo table for research statistics
-      await supabase
-        .from('demo_feira_fisica')
-        .insert([{
-          batedor_nome: nomeBatedouro,
-          material,
-          volume,
-          temp_final_original: finalTemp,
-          temp_final_otimizada: optimizedTemp,
-          ganho_termico: optimizedTemp - finalTemp
-        }]);
+      if (error) throw error;
       
       showSuccess("Dados científicos persistidos com sucesso.");
       onRecordSaved();
@@ -120,17 +105,6 @@ const ThermalValidation = ({ onRecordSaved, constants }: ThermalValidationProps)
       <Card className="lg:col-span-1 bg-slate-900 border-slate-800 p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">Configuração</h2>
-          <Select onValueChange={handleDemo}>
-            <SelectTrigger className="w-[140px] bg-purple-600/10 border-purple-600/20 text-purple-400 h-8 text-xs font-bold">
-              <PlayCircle size={14} className="mr-1" />
-              Live Demo
-            </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-800 text-white">
-              {batedoresData.map(b => (
-                <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
         
         <div className="space-y-2">
