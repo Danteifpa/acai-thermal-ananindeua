@@ -12,7 +12,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
-import { Info, Loader2 } from 'lucide-react';
+import { Info, Loader2, ShieldCheck } from 'lucide-react';
 import ThermalLab from './ThermalLab';
 import { showSuccess, showError } from '@/utils/toast';
 import { supabase } from '@/lib/supabase';
@@ -96,14 +96,14 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
                 value={nomeBatedouro}
                 onChange={(e) => setNomeBatedouro(e.target.value)}
                 placeholder="Ex: Batedouro Central"
-                className="w-full bg-slate-50 border-slate-200 text-slate-900 rounded-xl p-4 focus:ring-2 focus:ring-[#32a041] outline-none transition-all font-mono text-sm"
+                className="w-full bg-slate-50 border-slate-200 text-slate-900 rounded-xl p-4 focus:ring-2 focus:ring-[#1E562F] outline-none transition-all font-mono text-sm"
               />
             </div>
 
             <div className="space-y-6">
               <div className="flex justify-between items-end">
                 <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume (L)</Label>
-                <span className="text-[#32a041] font-black text-2xl font-mono">{volume}</span>
+                <span className="text-[#1E562F] font-black text-2xl font-mono">{volume}</span>
               </div>
               <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} className="py-2" />
             </div>
@@ -113,13 +113,13 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => setMaterial('Metal')}
-                  className={`p-4 rounded-xl border text-xs font-bold uppercase transition-all ${material === 'Metal' ? 'bg-[#32a041] border-[#32a041] text-white shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                  className={`p-4 rounded-xl border text-xs font-bold uppercase transition-all active:scale-95 ${material === 'Metal' ? 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-300 text-slate-800 shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
                 >
                   Aço Inox
                 </button>
                 <button 
                   onClick={() => setMaterial('Plástico')}
-                  className={`p-4 rounded-xl border text-xs font-bold uppercase transition-all ${material === 'Plástico' ? 'bg-[#32a041] border-[#32a041] text-white shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                  className={`p-4 rounded-xl border text-xs font-bold uppercase transition-all active:scale-95 ${material === 'Plástico' ? 'bg-[#1E562F] border-[#1E562F] text-white shadow-md' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
                 >
                   Polímero
                 </button>
@@ -131,9 +131,14 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
             <Button 
               onClick={handleSave} 
               disabled={isSaving} 
-              className="w-full bg-[#32a041] hover:bg-[#288034] text-white h-16 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-[#32a041]/20 transition-all active:scale-95"
+              className="w-full bg-[#1E562F] hover:bg-[#164023] text-white h-16 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-[#1E562F]/20 transition-all active:scale-95 hover:shadow-[#1E562F]/40"
             >
-              {isSaving ? <Loader2 className="animate-spin mr-2" /> : "Validar e Registrar"}
+              {isSaving ? <Loader2 className="animate-spin mr-2" /> : (
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={20} />
+                  <span>Validar e Registrar</span>
+                </div>
+              )}
             </Button>
 
             <Dialog>
@@ -149,7 +154,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
                 <div className="space-y-4 py-4 font-mono">
                   <div className="flex justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <span className="text-slate-500">Constante k:</span>
-                    <span className="text-[#32a041]">{currentPhysics.k.toFixed(6)} s⁻¹</span>
+                    <span className="text-[#1E562F]">{currentPhysics.k.toFixed(6)} s⁻¹</span>
                   </div>
                   <div className="flex justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <span className="text-slate-500">Energia Q:</span>
@@ -157,7 +162,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
                   </div>
                   <div className="flex justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <span className="text-slate-500">Calor Específico c:</span>
-                    <span className="text-[#32a041]">{material === 'Metal' ? 0.50 : 2.30} kJ/kg·K</span>
+                    <span className="text-[#1E562F]">{material === 'Metal' ? 0.50 : 2.30} kJ/kg·K</span>
                   </div>
                 </div>
               </DialogContent>

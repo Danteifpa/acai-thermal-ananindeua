@@ -8,6 +8,7 @@ import {
   Flame,
   Droplets
 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface ThermalLabProps {
   volume: number;
@@ -110,25 +111,45 @@ const ThermalLab = ({
           </div>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-slate-200">
-          <div className="flex items-center gap-2 text-slate-500 mb-4">
-            <Info size={14} />
-            <span className="text-[9px] font-bold uppercase">Controles de Bancada</span>
+        {/* Controles de Bancada - Overhauled */}
+        <div className="mt-auto pt-6 border-t border-slate-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[#1E562F]">
+              <Info size={14} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Controles de Bancada</span>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+
+          <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-inner relative flex gap-1">
+            <div 
+              className={cn(
+                "absolute top-2 bottom-2 w-[calc(50%-6px)] rounded-xl transition-all duration-300 ease-in-out z-0",
+                material === 'Metal' 
+                  ? "left-2 bg-gradient-to-br from-slate-200 to-slate-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.1)]" 
+                  : "left-[calc(50%+2px)] bg-[#1E562F] shadow-lg"
+              )}
+            />
+            
             <button 
               onClick={() => onMaterialChange('Metal')}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Metal' ? 'bg-[#1E562F] border-[#1E562F] text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-2 py-4 rounded-xl transition-all duration-200 z-10 active:scale-95",
+                material === 'Metal' ? "text-slate-800" : "text-slate-400 hover:text-slate-600"
+              )}
             >
-              <FlaskConical size={20} />
-              <span className="text-[8px] font-bold uppercase">Inox</span>
+              <FlaskConical size={24} strokeWidth={material === 'Metal' ? 2.5 : 2} />
+              <span className="text-[8px] font-black uppercase tracking-widest">Aço Inox</span>
             </button>
+
             <button 
               onClick={() => onMaterialChange('Plástico')}
-              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Plástico' ? 'bg-[#1E562F] border-[#1E562F] text-white shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-2 py-4 rounded-xl transition-all duration-200 z-10 active:scale-95",
+                material === 'Plástico' ? "text-white" : "text-slate-400 hover:text-slate-600"
+              )}
             >
-              <Box size={20} />
-              <span className="text-[8px] font-bold uppercase">Polímero</span>
+              <Box size={24} strokeWidth={material === 'Plástico' ? 2.5 : 2} />
+              <span className="text-[8px] font-black uppercase tracking-widest">Polímero</span>
             </button>
           </div>
         </div>
