@@ -55,7 +55,7 @@ const DashboardStats = ({ records }: DashboardStatsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-white border-slate-200 p-6 flex items-center gap-4 hover:border-[#1E562F]/30 transition-all shadow-sm hover:shadow-md">
+        <Card key={index} className="bg-white border-slate-200 p-6 flex items-center gap-4 hover:border-[#1E562F]/30 transition-all shadow-sm hover:shadow-md rounded-2xl">
           <div className={`${stat.bg} p-3 rounded-xl`}>
             <stat.icon className={stat.color} size={24} />
           </div>

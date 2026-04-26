@@ -13,7 +13,7 @@ const TopBar = ({ view }: TopBarProps) => {
     lab: 'Laboratório Virtual',
     field: 'Gestão de Campo',
     protocols: 'Protocolos de Segurança',
-    memorial: 'Memorial Acadêmico'
+    academy: 'Academia de Treinamento'
   };
 
   return (
@@ -30,7 +30,7 @@ const TopBar = ({ view }: TopBarProps) => {
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Motor de Física: Ativo</span>
         </div>
         <div className="h-4 w-[1px] bg-slate-200" />
-        <div className="flex items-center gap-2 text-blue-600">
+        <div className="flex items-center gap-2 text-[#1E562F]">
           <ShieldCheck size={16} />
           <span className="text-[10px] font-bold uppercase tracking-widest">Protocolo 52.5°C</span>
         </div>

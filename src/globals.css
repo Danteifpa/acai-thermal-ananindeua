@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* Pure White */
+    --background: 210 40% 98%; /* Slate 100 / #F1F5F9 */
     --foreground: 215 25% 17%; /* Deep Slate #1F2937 */
 
     --card: 0 0% 100%;
@@ -16,7 +16,7 @@
     --primary: 141 48% 23%; /* Deep IFPA Green #1E562F */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 98%; /* Slate 50 */
+    --secondary: 210 40% 96.1%; /* Slate 50 */
     --secondary-foreground: 215 25% 17%;
 
     --muted: 210 40% 96.1%;
@@ -32,7 +32,7 @@
     --input: 214 32% 91%;
     --ring: 141 48% 23%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 }
 
@@ -41,12 +41,22 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-slate-100 text-slate-900 antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply text-slate-900;
+    @apply text-slate-900 font-bold;
   }
   p {
-    @apply text-slate-800;
+    @apply text-slate-700;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white border border-slate-200 shadow-sm rounded-2xl transition-all duration-300;
+  }
+  
+  .ifpa-button {
+    @apply bg-[#1E562F] hover:bg-[#164023] text-white shadow-lg shadow-[#1E562F]/10 active:scale-[0.98] transition-all;
   }
 }
