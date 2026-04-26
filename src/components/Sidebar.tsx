@@ -2,17 +2,17 @@
 
 import React from 'react';
 import { 
-  LayoutDashboard, 
+  Home, 
   FlaskConical, 
-  Database, 
-  ShieldCheck, 
-  Settings,
+  FolderOpen, 
+  ShieldAlert, 
+  BookText,
   Thermometer
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import ChallengeMode from './ChallengeMode';
 
-export type ViewType = 'dashboard' | 'lab' | 'database' | 'safety_guide' | 'settings';
+export type ViewType = 'home' | 'lab' | 'field' | 'protocols' | 'memorial';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -21,11 +21,11 @@ interface SidebarProps {
 
 const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
-    { id: 'dashboard' as ViewType, icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'home' as ViewType, icon: Home, label: 'Início' },
     { id: 'lab' as ViewType, icon: FlaskConical, label: 'Laboratório Virtual' },
-    { id: 'database' as ViewType, icon: Database, label: 'Cadastro de Batedores' },
-    { id: 'safety_guide' as ViewType, icon: ShieldCheck, label: 'Guia de Segurança' },
-    { id: 'settings' as ViewType, icon: Settings, label: 'Ajustes' },
+    { id: 'field' as ViewType, icon: FolderOpen, label: 'Gestão de Campo' },
+    { id: 'protocols' as ViewType, icon: ShieldAlert, label: 'Protocolos de Segurança' },
+    { id: 'memorial' as ViewType, icon: BookText, label: 'Memorial Acadêmico' },
   ];
 
   return (
@@ -57,8 +57,11 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
         ))}
       </nav>
 
-      <div className="p-6 border-t border-slate-900 space-y-6">
-        <ChallengeMode />
+      <div className="p-6 border-t border-slate-900">
+        <div className="mb-4">
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Quick Quiz</p>
+          <ChallengeMode />
+        </div>
         <div className="text-center">
           <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">BCT / IFPA 2026</p>
         </div>
