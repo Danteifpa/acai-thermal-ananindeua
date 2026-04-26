@@ -44,21 +44,20 @@ const Index = () => {
   };
 
   const renderView = () => {
-    // Clear stage by returning null if no view matches (though switch handles it)
     switch (currentView) {
       case 'home':
         return (
           <div className="space-y-10 animate-in fade-in duration-500 max-w-6xl mx-auto">
             <header className="space-y-2">
-              <h1 className="text-4xl font-black text-white tracking-tight">Início</h1>
-              <p className="text-slate-400 text-lg">Resumo das atividades de validação térmica.</p>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Início</h1>
+              <p className="text-slate-500 text-lg">Resumo das atividades de validação térmica.</p>
             </header>
             <DashboardStats records={records} />
-            <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-3xl text-center space-y-4">
-              <h3 className="text-xl font-bold text-white">Bem-vindo ao AçaíThermal</h3>
-              <p className="text-slate-400 max-w-2xl mx-auto">
+            <div className="bg-white border border-slate-200 p-10 rounded-3xl text-center space-y-4 shadow-sm">
+              <h3 className="text-2xl font-bold text-slate-900">Bem-vindo ao AçaíThermal</h3>
+              <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 Este sistema foi desenvolvido para auxiliar batedores de açaí na validação científica do processo de branqueamento, 
-                garantindo a eliminação do Trypanosoma cruzi através de modelos termodinâmicos.
+                garantindo a eliminação do Trypanosoma cruzi através de modelos termodinâmicos rigorosos.
               </p>
             </div>
           </div>
@@ -97,7 +96,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-purple-500/30">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
       
       <div className="flex-1 flex flex-col min-w-0">

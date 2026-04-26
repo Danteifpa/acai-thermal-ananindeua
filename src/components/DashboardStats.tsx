@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { ShieldCheck, Droplets, Box, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Droplets, Box } from 'lucide-react';
 
 interface DashboardStatsProps {
   records: any[];
@@ -31,37 +31,37 @@ const DashboardStats = ({ records }: DashboardStatsProps) => {
       value: `${complianceRate.toFixed(1)}% Seguro`,
       subtext: `${safeCount} de ${total} amostras`,
       icon: ShieldCheck,
-      color: 'text-green-400',
-      bg: 'bg-green-400/10'
+      color: 'text-green-600',
+      bg: 'bg-green-50'
     },
     {
-      label: 'Volume Médio (Cidade)',
+      label: 'Volume Médio',
       value: `${avgVolume.toFixed(1)} Litros`,
       subtext: 'Média Ananindeua/PA',
       icon: Droplets,
-      color: 'text-blue-400',
-      bg: 'bg-blue-400/10'
+      color: 'text-blue-600',
+      bg: 'bg-blue-50'
     },
     {
       label: 'Material Predominante',
       value: predominantMaterial,
       subtext: 'Uso majoritário local',
       icon: Box,
-      color: 'text-purple-400',
-      bg: 'bg-purple-400/10'
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50'
     }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-slate-900 border-slate-800 p-6 flex items-center gap-4 hover:border-slate-700 transition-colors">
+        <Card key={index} className="bg-white border-slate-200 p-6 flex items-center gap-4 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
           <div className={`${stat.bg} p-3 rounded-xl`}>
             <stat.icon className={stat.color} size={24} />
           </div>
           <div>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">{stat.label}</p>
-            <p className="text-2xl font-black text-white">{stat.value}</p>
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{stat.label}</p>
+            <p className="text-2xl font-black text-slate-900">{stat.value}</p>
             <p className="text-slate-400 text-xs mt-1">{stat.subtext}</p>
           </div>
         </Card>

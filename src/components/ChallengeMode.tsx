@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trophy, RefreshCcw, CheckCircle2, XCircle } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 import { showSuccess } from '@/utils/toast';
 
 const ChallengeMode = () => {
@@ -25,7 +24,6 @@ const ChallengeMode = () => {
   }, []);
 
   const checkAnswer = (userGuessSafe: boolean) => {
-    // Core Thermal Physics Logic
     const T0 = 80;
     const TENV = 25;
     const cp = challenge.material === 'Metal' ? 0.50 : 2.30;
@@ -44,7 +42,7 @@ const ChallengeMode = () => {
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-4 relative overflow-hidden">
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-4 relative overflow-hidden shadow-inner">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-amber-400">
           <Trophy size={16} />
@@ -53,7 +51,7 @@ const ChallengeMode = () => {
         <div className="text-amber-400 font-mono font-bold text-xs">Score: {score}</div>
       </div>
 
-      <div className="bg-slate-950/50 rounded-lg p-3 text-center space-y-2 border border-slate-800/50">
+      <div className="bg-slate-900 rounded-lg p-3 text-center space-y-2 border border-slate-700">
         <p className="text-slate-500 text-[9px] uppercase font-bold">Cenário Experimental</p>
         <div className="text-sm font-black text-white">
           {challenge.volume}L em {challenge.material}
@@ -64,13 +62,13 @@ const ChallengeMode = () => {
       <div className="flex gap-2">
         <button 
           onClick={() => checkAnswer(true)}
-          className="flex-1 bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white border border-green-600/20 text-[10px] font-bold py-2 rounded-lg transition-all"
+          className="flex-1 bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white border border-green-600/30 text-[10px] font-bold py-2 rounded-lg transition-all"
         >
           Sim
         </button>
         <button 
           onClick={() => checkAnswer(false)}
-          className="flex-1 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 text-[10px] font-bold py-2 rounded-lg transition-all"
+          className="flex-1 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 text-[10px] font-bold py-2 rounded-lg transition-all"
         >
           Não
         </button>
@@ -80,13 +78,13 @@ const ChallengeMode = () => {
         <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md transition-all ${feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
           {feedback === 'correct' ? (
             <div className="flex flex-col items-center gap-2">
-              <CheckCircle2 className="text-green-500" size={32} />
-              <span className="text-[10px] font-black text-green-500 uppercase">Acertou!</span>
+              <CheckCircle2 className="text-green-400" size={32} />
+              <span className="text-[10px] font-black text-green-400 uppercase">Acertou!</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <XCircle className="text-red-500" size={32} />
-              <span className="text-[10px] font-black text-red-500 uppercase">Errou!</span>
+              <XCircle className="text-red-400" size={32} />
+              <span className="text-[10px] font-black text-red-400 uppercase">Errou!</span>
             </div>
           )}
           <button 
