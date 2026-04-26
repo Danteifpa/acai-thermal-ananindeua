@@ -1,7 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Thermometer, Zap, Timer, Activity, Search, ShieldCheck, AlertCircle, Box, FlaskConical } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { 
+  Thermometer, 
+  Zap, 
+  Droplets, 
+  Flame, 
+  Activity, 
+  Info, 
+  Box, 
+  FlaskConical,
+  Maximize2,
+  RotateCcw
+} from 'lucide-react';
 
 interface ThermalLabProps {
   volume: number;
@@ -10,10 +22,50 @@ interface ThermalLabProps {
   isSafe: boolean;
   k: number;
   q: number;
-  timeToCritical: number;
   onMaterialChange: (m: string) => void;
   onVolumeChange: (v: number) => void;
 }
+
+const Particle = ({ containerWidth, containerHeight, speed }: { containerWidth: number, containerHeight: number, speed: number }) => {
+  const [pos, setPos] = useState({ x: Math.random() * containerWidth, y: Math.random() * containerHeight });
+  const [vel, setVel] = useState({ 
+    x: (Math.random() - 0.5) * speed, 
+    y: (Math.random() - 0.5) * speed 
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPos(prev => {
+        let newX = prev.x + vel.x;
+        let newY = prev.y + vel.y;
+        let newVelX = vel.x;
+        let newVelY = vel.y;
+
+        if (newX < 0 || newX > containerWidth) newVelX *= -1;
+        if (newY < 0 || newY > containerHeight) newVelY *= -1;
+        
+        setVel({ x: newVelX, y: newVelY });
+        return { x: Math.max(0, Math.min(containerWidth, newX)), y: Math.max(0, Math.min(containerHeight, newY)) };
+      });
+    }, 30);
+    return () => clearInterval(interval);
+  }, [vel, containerWidth, containerHeight]);
+
+  // Update velocity when speed changes
+  useEffect(() => {
+    setVel(v => ({
+      x: (v.x / (Math.abs(v.x) || 1)) * (Math.random() * speed),
+      y: (v.y / (Math.abs(v.y) || 1)) * (Math.random() * speed)
+    }));
+  }, [speed]);
+
+  return (
+    <div 
+      className="absolute w-1 h-1 bg-white/40 rounded-full"
+      style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+    />
+  );
+};
 
 const ThermalLab = ({ 
   volume, 
@@ -21,189 +73,175 @@ const ThermalLab = ({
   temp, 
   isSafe, 
   k, 
-  q, 
-  timeToCritical,
+  q,
   onMaterialChange,
   onVolumeChange
 }: ThermalLabProps) => {
-  const [showMicro, setShowMicro] = useState(false);
-  const [displayQ, setDisplayQ] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [thermometerPos, setThermometerPos] = useState({ x: 50, y: 50 });
+  const [isHeating, setIsHeating] = useState(false);
+  
+  const deltaT = Math.abs(temp - 80).toFixed(1);
+  const specificHeat = material === 'Metal' ? 0.50 : 2.30;
+  
+  // Particle speed based on temperature (Kinetic Energy)
+  const particleSpeed = useMemo(() => 1 + (temp / 20), [temp]);
+  const particleCount = 40;
 
-  useEffect(() => { setIsMounted(true); }, []);
-
-  // Energy Counter
-  useEffect(() => {
-    const target = q || 0;
-    const start = displayQ;
-    const startTime = performance.now();
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / 400, 1);
-      setDisplayQ(Math.floor(start + (target - start) * progress));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [q]);
-
-  if (!isMounted) return null;
-
-  const fillPercentage = Math.min(90, 20 + (volume / 50) * 70);
-
-  // Inverse Calculation for Thermometer Drag
-  const handleThermometerDrag = (e: React.MouseEvent | React.TouchEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-    const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
-    const percentage = 1 - (y / rect.height);
-    const targetTemp = 25 + (percentage * 55); // Range 25 to 80
-    
-    // Inverse Physics: V = (k_base / (cp * k_target))^5
-    const cp = material === 'Metal' ? 0.5 : 2.3;
-    const kBase = material === 'Metal' ? 0.004 : 0.0015;
-    const kTarget = -Math.log((targetTemp - 25) / 55) / 600;
-    
-    if (kTarget > 0) {
-      const calculatedV = Math.pow(kBase / (cp * kTarget), 5);
-      onVolumeChange(Math.max(1, Math.min(50, Math.round(calculatedV))));
-    }
+  // Color gradient based on temp
+  const getLiquidColor = () => {
+    if (temp > 70) return 'bg-red-600/80';
+    if (temp > 52.5) return 'bg-purple-600/80';
+    return 'bg-blue-600/80';
   };
 
   return (
-    <div className={`relative w-full h-[600px] bg-slate-950 rounded-3xl border-2 border-slate-800 overflow-hidden font-mono transition-all duration-700 ${isSafe ? 'shadow-[0_0_60px_rgba(34,197,94,0.2)]' : 'shadow-[0_0_60px_rgba(239,68,68,0.2)]'}`}>
-      {/* HUD Header */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 z-30">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full animate-pulse ${isSafe ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500 shadow-[0_0_10px_#ef4444]'}`} />
-            <span className="text-xs font-black text-white uppercase tracking-widest">Sistema de Monitoramento</span>
+    <div className="relative w-full h-[700px] bg-slate-950 rounded-3xl border-2 border-slate-800 overflow-hidden font-mono flex shadow-2xl">
+      
+      {/* Scientific HUD - Left Side */}
+      <div className="w-72 bg-slate-900/50 border-r border-slate-800 p-6 flex flex-col gap-6 z-20 backdrop-blur-md">
+        <div className="space-y-1">
+          <h3 className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Live Data Panel</h3>
+          <p className="text-xs text-slate-500">Real-time Thermodynamics</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1">
+            <p className="text-[9px] font-bold text-slate-500 uppercase">ΔT (Variação)</p>
+            <p className="text-2xl font-black text-white">{deltaT}°C</p>
           </div>
-          <div className="h-6 w-px bg-slate-800" />
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => onMaterialChange('Plástico')}
-              className={`p-2 rounded-lg transition-all ${material === 'Plástico' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-              title="Balde de Plástico"
-            >
-              <Box size={20} />
-            </button>
+
+          <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1">
+            <p className="text-[9px] font-bold text-slate-500 uppercase">Calor Específico (c)</p>
+            <p className="text-2xl font-black text-blue-400">{specificHeat.toFixed(2)} <span className="text-[10px] text-slate-500">kJ/kg·K</span></p>
+          </div>
+
+          <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1">
+            <p className="text-[9px] font-bold text-slate-500 uppercase">Energia (Q)</p>
+            <p className="text-2xl font-black text-amber-400">{Math.floor(q).toLocaleString()} <span className="text-[10px] text-slate-500">J</span></p>
+          </div>
+
+          <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-1">
+            <p className="text-[9px] font-bold text-slate-500 uppercase">Status Biológico</p>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isSafe ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className={`text-sm font-bold ${isSafe ? 'text-green-500' : 'text-red-500'}`}>
+                {isSafe ? 'INATIVADO' : 'RISCO ATIVO'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-6 border-t border-slate-800">
+          <div className="flex items-center gap-2 text-slate-500 mb-4">
+            <Info size={14} />
+            <span className="text-[9px] font-bold uppercase">Controles de Bancada</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
             <button 
               onClick={() => onMaterialChange('Metal')}
-              className={`p-2 rounded-lg transition-all ${material === 'Metal' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-              title="Panela de Inox"
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Metal' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
             >
               <FlaskConical size={20} />
+              <span className="text-[8px] font-bold uppercase">Inox</span>
+            </button>
+            <button 
+              onClick={() => onMaterialChange('Plástico')}
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${material === 'Plástico' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
+            >
+              <Box size={20} />
+              <span className="text-[8px] font-bold uppercase">Polímero</span>
             </button>
           </div>
         </div>
-        <button 
-          onClick={() => setShowMicro(!showMicro)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showMicro ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-        >
-          <Search size={16} />
-          Vista Microscópica
-        </button>
       </div>
 
-      {/* Main Lab Area */}
-      <div className="absolute inset-0 flex items-center justify-center pt-16">
-        {/* Interactive Thermometer */}
-        <div className="absolute left-12 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
-          <div className="text-[10px] font-bold text-slate-500 uppercase vertical-text">Arraste para ajustar alvo</div>
-          <div 
-            className="relative w-8 h-64 bg-slate-900 rounded-full border-2 border-slate-800 cursor-ns-resize group"
-            onMouseDown={handleThermometerDrag}
+      {/* Main Experiment Area */}
+      <div className="flex-1 relative flex items-center justify-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 to-slate-950">
+        
+        {/* Grid Overlay */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none" 
+             style={{ backgroundImage: 'linear-gradient(#475569 1px, transparent 1px), linear-gradient(90deg, #475569 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
+        />
+
+        {/* Draggable Sources */}
+        <div className="absolute top-8 left-8 flex gap-4 z-30">
+          <motion.div 
+            drag 
+            dragConstraints={{ left: 0, right: 400, top: 0, bottom: 400 }}
+            className="w-14 h-14 bg-orange-600/20 border-2 border-orange-500 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg shadow-orange-500/20"
+            title="Fonte de Calor"
           >
-            <div 
-              className={`absolute bottom-0 left-0 right-0 rounded-full transition-all duration-500 ${temp >= 52.5 ? 'bg-green-500' : 'bg-red-500'}`}
-              style={{ height: `${((temp - 25) / 55) * 100}%` }}
-            />
-            <div className="absolute -right-12 top-0 bottom-0 flex flex-col justify-between text-[10px] font-bold text-slate-600 py-2">
-              <span>80°C</span>
-              <span>52.5°C</span>
-              <span>25°C</span>
-            </div>
-          </div>
+            <Flame className="text-orange-500" size={28} />
+          </motion.div>
+          <motion.div 
+            drag 
+            dragConstraints={{ left: 0, right: 400, top: 0, bottom: 400 }}
+            className="w-14 h-14 bg-blue-600/20 border-2 border-blue-500 rounded-2xl flex items-center justify-center cursor-grab active:cursor-grabbing shadow-lg shadow-blue-500/20"
+            title="Fonte de Água"
+          >
+            <Droplets className="text-blue-500" size={28} />
+          </motion.div>
         </div>
 
-        {/* Container Visualizer */}
-        <div className="relative">
-          {/* SAFE Stamp */}
-          {isSafe && (
-            <div className="absolute -top-20 -right-20 z-40 animate-in zoom-in duration-500 rotate-12">
-              <div className="border-4 border-green-500 text-green-500 px-6 py-2 rounded-xl font-black text-3xl uppercase tracking-tighter bg-slate-950/80 backdrop-blur-sm">
-                SEGURO
-              </div>
-            </div>
-          )}
-
-          {/* Container */}
-          <div className={`relative w-64 h-72 border-x-4 border-b-4 rounded-b-3xl bg-slate-900/40 overflow-hidden backdrop-blur-sm transition-colors duration-500 ${material === 'Metal' ? 'border-slate-400' : 'border-slate-700'}`}>
+        {/* Central Container Cross-Section */}
+        <div className="relative group">
+          {/* Container Walls */}
+          <div className={`relative w-80 h-96 border-x-[6px] border-b-[6px] rounded-b-[40px] bg-slate-900/40 backdrop-blur-sm transition-all duration-500 ${material === 'Metal' ? 'border-slate-400 shadow-[0_0_30px_rgba(148,163,184,0.2)]' : 'border-slate-700'}`}>
+            
+            {/* Liquid Content */}
             <div 
-              className={`absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-in-out ${temp >= 52.5 ? 'bg-purple-700' : 'bg-purple-900'}`}
-              style={{ height: `${fillPercentage}%` }}
+              className={`absolute bottom-0 left-0 right-0 rounded-b-[34px] transition-all duration-1000 ease-in-out overflow-hidden ${getLiquidColor()}`}
+              style={{ height: `${Math.min(95, 20 + (volume / 50) * 75)}%` }}
             >
-              <div className="absolute top-0 left-0 right-0 h-4 bg-white/10 animate-pulse" />
+              {/* Particles */}
+              <div className="absolute inset-0">
+                {Array.from({ length: particleCount }).map((_, i) => (
+                  <Particle key={i} containerWidth={320} containerHeight={380} speed={particleSpeed} />
+                ))}
+              </div>
+
+              {/* Surface Wave Effect */}
+              <div className="absolute top-0 left-0 right-0 h-4 bg-white/20 animate-pulse" />
             </div>
           </div>
-        </div>
 
-        {/* Microscopic View Pop-up */}
-        {showMicro && (
-          <div className="absolute right-12 top-1/2 -translate-y-1/2 w-64 h-64 bg-slate-900 rounded-full border-4 border-blue-500/30 overflow-hidden shadow-2xl z-40 animate-in zoom-in duration-300">
-            <div className="absolute inset-0 bg-blue-900/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              {!isSafe ? (
-                <div className="relative w-full h-full">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div 
-                      key={i}
-                      className="absolute w-8 h-4 bg-green-400/40 rounded-full blur-[1px] animate-bounce"
-                      style={{ 
-                        top: `${20 + Math.random() * 60}%`, 
-                        left: `${20 + Math.random() * 60}%`,
-                        animationDelay: `${i * 0.2}s`
-                      }}
-                    />
-                  ))}
-                  <div className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-bold text-red-400 uppercase">Patógenos Ativos</div>
+          {/* Draggable Digital Thermometer */}
+          <motion.div 
+            drag
+            dragConstraints={{ left: -150, right: 150, top: -100, bottom: 250 }}
+            className="absolute -top-20 left-1/2 -translate-x-1/2 z-40 cursor-grab active:cursor-grabbing"
+          >
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-48 bg-slate-800 rounded-full border-4 border-slate-700 relative flex flex-col items-center py-4 shadow-2xl">
+                <div className="bg-slate-950 px-2 py-1 rounded border border-slate-700 mb-4">
+                  <span className="text-[10px] font-black text-green-400">{temp.toFixed(1)}°</span>
                 </div>
-              ) : (
-                <div className="text-center space-y-2">
-                  <ShieldCheck className="text-green-500 mx-auto" size={48} />
-                  <div className="text-[10px] font-bold text-green-400 uppercase">Inativados</div>
+                <div className="w-2 flex-1 bg-slate-900 rounded-full relative overflow-hidden">
+                  <div 
+                    className={`absolute bottom-0 left-0 right-0 transition-all duration-500 ${temp > 52.5 ? 'bg-red-500' : 'bg-blue-500'}`}
+                    style={{ height: `${((temp - 25) / 55) * 100}%` }}
+                  />
                 </div>
-              )}
+              </div>
+              <div className="w-1 h-20 bg-slate-400" />
+              <div className="w-4 h-4 bg-slate-400 rounded-full shadow-lg" />
             </div>
-            <div className="absolute inset-0 border-[20px] border-slate-950/50 rounded-full pointer-events-none" />
-          </div>
-        )}
-      </div>
+          </motion.div>
+        </div>
 
-      {/* HUD Footer */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 flex items-center justify-around px-8 z-30">
-        <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Energia (Q)</p>
-          <p className="text-xl font-black text-white">{displayQ.toLocaleString()} J</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Temp. Final</p>
-          <p className={`text-xl font-black ${isSafe ? 'text-green-400' : 'text-red-400'}`}>{temp.toFixed(1)} °C</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Status</p>
-          <div className="flex items-center gap-2">
-            {isSafe ? <ShieldCheck className="text-green-500" size={20} /> : <AlertCircle className="text-red-500" size={20} />}
-            <span className={`text-xs font-bold uppercase ${isSafe ? 'text-green-500' : 'text-red-500'}`}>
-              {isSafe ? 'Seguro' : 'Risco'}
-            </span>
-          </div>
+        {/* Lab Branding Overlay */}
+        <div className="absolute bottom-6 right-8 text-right">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Virtual Lab Environment</p>
+          <p className="text-[8px] text-slate-700 font-bold uppercase">IFPA Campus Ananindeua • 2026</p>
         </div>
       </div>
 
-      {/* Academic Signature */}
-      <div className="absolute bottom-2 right-4 text-[8px] text-slate-600 font-bold uppercase tracking-widest opacity-50">
-        Dante • Thais • Edenilson | BCT IFPA 2026
+      {/* Footer Branding */}
+      <div className="absolute bottom-0 left-0 right-0 h-10 bg-slate-900/90 border-t border-slate-800 flex items-center justify-center px-8 z-30">
+        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+          Bacharelado em Ciência e Tecnologia - IFPA | Dante Monteiro • Thais Chagas • Edenilson do Carmo
+        </p>
       </div>
     </div>
   );
