@@ -1,17 +1,19 @@
-import { toast } from "sonner";
-
 export const showSuccess = (message: string) => {
-  toast.success(message);
+  console.log("Success:", message);
+  // Using a simple alert as a fallback for the fair
+  alert(message);
 };
 
 export const showError = (message: string) => {
-  toast.error(message);
+  console.error("Error:", message);
+  alert("Erro: " + message);
 };
 
 export const showLoading = (message: string) => {
-  return toast.loading(message);
+  console.log("Loading:", message);
+  return "loading-id";
 };
 
 export const dismissToast = (toastId: string) => {
-  toast.dismiss(toastId);
+  console.log("Dismissing toast:", toastId);
 };
