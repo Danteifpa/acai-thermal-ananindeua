@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { 
-  Home, 
-  FlaskConical, 
-  FolderOpen, 
+  PalmTree, 
+  Waves, 
+  MapPin, 
   ShieldAlert, 
   GraduationCap,
-  Thermometer
+  Thermometer,
+  Package
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -22,48 +23,46 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { 
       id: 'home' as ViewType, 
-      icon: Home, 
+      icon: PalmTree, 
       label: 'Início',
       iconClass: (active: boolean) => active ? "animate-pulse-soft" : ""
     },
     { 
       id: 'lab' as ViewType, 
-      icon: FlaskConical, 
-      label: 'Laboratório Virtual',
+      icon: Waves, 
+      label: 'Laboratório',
       iconClass: () => "animate-bobbing-hover"
     },
     { 
       id: 'field' as ViewType, 
-      icon: FolderOpen, 
-      label: 'Gestão de Campo',
+      icon: MapPin, 
+      label: 'Gestão',
       iconClass: () => "animate-bounce-hover"
     },
     { 
       id: 'protocols' as ViewType, 
       icon: ShieldAlert, 
-      label: 'Protocolos de Segurança',
+      label: 'Protocolos',
       iconClass: () => "" 
     },
     { 
       id: 'academy' as ViewType, 
       icon: GraduationCap, 
-      label: 'Academia de Treinamento',
+      label: 'Academia',
       iconClass: () => "animate-rotate-hover"
     },
   ];
 
   return (
-    <div className="w-64 bg-[#1E562F] flex flex-col h-screen sticky top-0 shadow-2xl z-50">
-      <div className="p-8">
-        <div className="flex items-center gap-3">
-          <div className="bg-white p-2 rounded-xl shadow-lg">
-            <Thermometer className="text-[#1E562F]" size={24} />
-          </div>
-          <h1 className="text-xl font-black text-white tracking-tighter">AçaíThermal</h1>
+    <div className="w-32 bg-[#1E562F] flex flex-col h-screen sticky top-0 shadow-2xl z-50 border-r border-white/5">
+      <div className="py-8 flex flex-col items-center gap-2">
+        <div className="bg-white p-3 rounded-2xl shadow-xl mb-2">
+          <Thermometer className="text-[#1E562F]" size={32} strokeWidth={2.5} />
         </div>
+        <h1 className="text-[10px] font-black text-white uppercase tracking-[0.2em] text-center px-2">AçaíThermal</h1>
       </div>
       
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 px-2 space-y-4 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => {
           const isActive = currentView === item.id;
           return (
@@ -71,24 +70,41 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
               key={item.id}
               onClick={() => onViewChange(item.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-sm group",
+                "w-full flex flex-col items-center gap-2 py-4 rounded-2xl transition-all duration-300 group relative",
                 isActive 
-                  ? "bg-white text-[#1E562F] shadow-xl" 
-                  : "text-white/90 hover:bg-white/10 hover:text-white hover:scale-[1.03]"
+                  ? "bg-white text-[#1E562F] shadow-2xl scale-105" 
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
-              <item.icon 
-                size={18} 
-                className={cn("transition-transform duration-300", item.iconClass(isActive))} 
-              />
-              <span className="transition-transform duration-200">{item.label}</span>
+              <div className={cn(
+                "p-2 rounded-xl transition-transform duration-300",
+                isActive ? "bg-emerald-50" : "bg-transparent",
+                item.iconClass(isActive)
+              )}>
+                <item.icon 
+                  size={32} 
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={cn(
+                    "transition-all duration-300",
+                    isActive ? "drop-shadow-[0_0_8px_rgba(30,86,47,0.3)]" : ""
+                  )}
+                />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-center leading-tight">
+                {item.label}
+              </span>
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#1E562F] rounded-r-full" />
+              )}
             </button>
           );
         })}
       </nav>
 
-      <div className="p-8 border-t border-white/10 text-center">
-        <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">BCT / IFPA 2026</p>
+      <div className="p-4 border-t border-white/10 text-center">
+        <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest leading-relaxed">
+          BCT<br/>IFPA 2026
+        </p>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ const Footer = () => {
           Bacharelado em Ciência e Tecnologia - IFPA Campus Ananindeua | 2026
         </p>
         <p className="text-sm text-slate-800 font-bold">
-          Dante • Thais • Edenilson
+          Dante Monteiro • Thais Chagas • Edenilson do Carmo
         </p>
         <p className="text-[10px] text-slate-400 opacity-60">
           © 2026 AçaíThermal - Projeto Acadêmico
