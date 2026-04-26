@@ -84,37 +84,37 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
     <div className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-4xl font-black text-white tracking-tight">Base de Dados: Batedores</h1>
-          <p className="text-slate-400 text-lg">Mapeamento geográfico de Ananindeua/PA.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Base de Dados: Batedores</h1>
+          <p className="text-slate-500 text-lg">Mapeamento geográfico de Ananindeua/PA.</p>
         </div>
         
         <div className="flex gap-3">
           <Button 
             variant="outline" 
             onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-            className="bg-slate-900 border-slate-800 text-slate-400 gap-2 h-12 rounded-xl"
+            className="bg-white border-slate-200 text-slate-600 gap-2 h-12 rounded-xl shadow-sm"
           >
             {viewMode === 'list' ? <LayoutGrid size={20} /> : <Database size={20} />}
             {viewMode === 'list' ? 'Ver por Bairro' : 'Ver Lista'}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white gap-2 h-12 px-6 rounded-xl font-bold">
+              <Button className="bg-[#1E562F] hover:bg-[#164023] text-white gap-2 h-12 px-6 rounded-xl font-bold shadow-lg shadow-[#1E562F]/10">
                 <Plus size={20} /> Cadastrar
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white sm:max-w-[425px]">
+            <DialogContent className="bg-white border-slate-200 text-slate-900 sm:max-w-[425px]">
               <DialogHeader><DialogTitle className="text-2xl font-bold">Novo Batedouro</DialogTitle></DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-400">Nome da Unidade</Label>
-                  <Input value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="bg-slate-950 border-slate-800" />
+                  <Label className="text-slate-500">Nome da Unidade</Label>
+                  <Input value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="bg-slate-50 border-slate-200" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-400">Bairro (Ananindeua)</Label>
+                  <Label className="text-slate-500">Bairro (Ananindeua)</Label>
                   <Select value={formData.localizacao} onValueChange={(val) => setFormData({...formData, localizacao: val})}>
-                    <SelectTrigger className="bg-slate-950 border-slate-800"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                    <SelectTrigger className="bg-slate-50 border-slate-200"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200">
                       <SelectItem value="Cidade Nova">Cidade Nova</SelectItem>
                       <SelectItem value="Coqueiro">Coqueiro</SelectItem>
                       <SelectItem value="Centro">Centro</SelectItem>
@@ -125,7 +125,7 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSave} disabled={isSaving} className="w-full bg-purple-600 h-12 rounded-xl font-bold">
+                <Button onClick={handleSave} disabled={isSaving} className="w-full bg-[#1E562F] h-12 rounded-xl font-bold">
                   {isSaving ? <Loader2 className="animate-spin mr-2" /> : <Plus className="mr-2" />} Salvar
                 </Button>
               </DialogFooter>
@@ -137,17 +137,17 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
       {viewMode === 'map' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(groupedBatedores).map(([neighborhood, items]: [string, any]) => (
-            <Card key={neighborhood} className="bg-slate-900 border-slate-800 p-6 space-y-4">
-              <div className="flex items-center gap-2 text-purple-400 border-b border-slate-800 pb-3">
+            <Card key={neighborhood} className="bg-white border-slate-200 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center gap-2 text-[#1E562F] border-b border-slate-100 pb-3">
                 <MapPin size={18} />
                 <h3 className="font-black uppercase tracking-widest text-sm">{neighborhood}</h3>
-                <Badge variant="outline" className="ml-auto border-slate-700 text-slate-500">{items.length}</Badge>
+                <Badge variant="outline" className="ml-auto border-slate-200 text-slate-400">{items.length}</Badge>
               </div>
               <div className="space-y-2">
                 {items.map((b: any) => (
-                  <div key={b.id} className="flex justify-between items-center p-2 hover:bg-slate-800 rounded-lg transition-colors group">
-                    <span className="text-sm text-slate-300 font-medium">{b.nome}</span>
-                    <Button size="sm" variant="ghost" onClick={() => onSimulate(b)} className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 text-purple-400">
+                  <div key={b.id} className="flex justify-between items-center p-2 hover:bg-slate-50 rounded-lg transition-colors group">
+                    <span className="text-sm text-slate-700 font-medium">{b.nome}</span>
+                    <Button size="sm" variant="ghost" onClick={() => onSimulate(b)} className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 text-[#1E562F]">
                       <Play size={14} />
                     </Button>
                   </div>
@@ -157,28 +157,28 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
           ))}
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <Table>
-            <TableHeader className="bg-slate-950">
-              <TableRow className="border-slate-800">
-                <TableHead className="text-slate-400">Nome</TableHead>
-                <TableHead className="text-slate-400">Bairro</TableHead>
-                <TableHead className="text-slate-400">Material</TableHead>
-                <TableHead className="text-slate-400">Volume</TableHead>
-                <TableHead className="text-slate-400 text-right">Ações</TableHead>
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-slate-200">
+                <TableHead className="text-slate-900 font-bold">Nome</TableHead>
+                <TableHead className="text-slate-900 font-bold">Bairro</TableHead>
+                <TableHead className="text-slate-900 font-bold">Material</TableHead>
+                <TableHead className="text-slate-900 font-bold">Volume</TableHead>
+                <TableHead className="text-slate-900 font-bold text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto text-purple-500" /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="animate-spin mx-auto text-[#1E562F]" /></TableCell></TableRow>
               ) : batedores.map((batedor) => (
-                <TableRow key={batedor.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
-                  <TableCell className="text-white font-bold">{batedor.nome}</TableCell>
-                  <TableCell className="text-slate-400 text-sm">{batedor.localizacao}</TableCell>
-                  <TableCell><Badge variant="outline" className="border-slate-700 text-slate-300">{batedor.material_padrao}</Badge></TableCell>
-                  <TableCell className="text-purple-400 font-mono">{batedor.volume_padrao}L</TableCell>
+                <TableRow key={batedor.id} className="border-slate-200 hover:bg-slate-50 transition-colors">
+                  <TableCell className="text-slate-900 font-bold">{batedor.nome}</TableCell>
+                  <TableCell className="text-slate-600 text-sm">{batedor.localizacao}</TableCell>
+                  <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600">{batedor.material_padrao}</Badge></TableCell>
+                  <TableCell className="text-[#1E562F] font-mono font-bold">{batedor.volume_padrao}L</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" onClick={() => onSimulate(batedor)} className="bg-purple-600/10 text-purple-400 hover:bg-purple-600 hover:text-white border border-purple-600/20 gap-2 rounded-lg">
+                    <Button size="sm" onClick={() => onSimulate(batedor)} className="bg-emerald-50 text-[#1E562F] hover:bg-[#1E562F] hover:text-white border border-emerald-100 gap-2 rounded-lg transition-all">
                       <Play size={14} /> Simular
                     </Button>
                   </TableCell>

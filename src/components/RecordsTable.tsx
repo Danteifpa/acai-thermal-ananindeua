@@ -17,48 +17,48 @@ interface Record {
 
 const RecordsTable = ({ records }: { records: Record[] }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-white">Registros Científicos</h2>
-        <Badge variant="outline" className="text-slate-400 border-slate-700">
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-slate-900">Registros Científicos</h2>
+        <Badge variant="outline" className="text-slate-500 border-slate-200">
           {records.length} Amostras
         </Badge>
       </div>
       <Table>
-        <TableHeader className="bg-slate-950">
-          <TableRow className="border-slate-800 hover:bg-transparent">
-            <TableHead className="text-slate-400">ID</TableHead>
-            <TableHead className="text-slate-400">Timestamp</TableHead>
-            <TableHead className="text-slate-400">Material</TableHead>
-            <TableHead className="text-slate-400">Volume</TableHead>
-            <TableHead className="text-slate-400">Temp. Final</TableHead>
-            <TableHead className="text-slate-400 text-right">Status</TableHead>
+        <TableHeader className="bg-slate-50">
+          <TableRow className="border-slate-200 hover:bg-transparent">
+            <TableHead className="text-slate-900 font-bold">ID</TableHead>
+            <TableHead className="text-slate-900 font-bold">Timestamp</TableHead>
+            <TableHead className="text-slate-900 font-bold">Material</TableHead>
+            <TableHead className="text-slate-900 font-bold">Volume</TableHead>
+            <TableHead className="text-slate-900 font-bold">Temp. Final</TableHead>
+            <TableHead className="text-slate-900 font-bold text-right">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {records.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-10 text-slate-500">
+              <TableCell colSpan={6} className="text-center py-10 text-slate-400">
                 Nenhum dado científico encontrado.
               </TableCell>
             </TableRow>
           ) : (
             records.map((record) => (
-              <TableRow key={record.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
-                <TableCell className="text-slate-500 font-mono text-[10px]">
+              <TableRow key={record.id} className="border-slate-100 hover:bg-slate-50 transition-colors">
+                <TableCell className="text-slate-400 font-mono text-[10px]">
                   {record.id.slice(0, 8)}...
                 </TableCell>
-                <TableCell className="text-slate-300 font-mono text-xs">
+                <TableCell className="text-slate-600 font-mono text-xs">
                   {format(new Date(record.created_at), 'dd/MM/yyyy HH:mm:ss')}
                 </TableCell>
-                <TableCell className="text-white font-medium">{record.material}</TableCell>
-                <TableCell className="text-slate-400">{record.volume}L</TableCell>
-                <TableCell className="text-purple-400 font-bold">{record.temp_final}°C</TableCell>
+                <TableCell className="text-slate-900 font-medium">{record.material}</TableCell>
+                <TableCell className="text-slate-600">{record.volume}L</TableCell>
+                <TableCell className="text-[#1E562F] font-bold">{record.temp_final}°C</TableCell>
                 <TableCell className="text-right">
                   <Badge 
                     className={record.status_sanitario === 'Processo Seguro' 
-                      ? "bg-green-500/10 text-green-500 border-green-500/20" 
-                      : "bg-red-500/10 text-red-500 border-red-500/20"
+                      ? "bg-emerald-50 text-[#1E562F] border-emerald-100" 
+                      : "bg-red-50 text-[#e41b13] border-red-100"
                     }
                   >
                     {record.status_sanitario}
