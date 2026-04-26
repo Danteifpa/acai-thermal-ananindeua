@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { 
-  Trees, 
-  Waves, 
-  MapPin, 
+  LayoutDashboard, 
+  ThermometerSnowflake, 
+  ClipboardList, 
   ShieldAlert, 
   GraduationCap,
   Thermometer
@@ -22,19 +22,19 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { 
       id: 'home' as ViewType, 
-      icon: Trees, 
+      icon: LayoutDashboard, 
       label: 'Início',
       iconClass: (active: boolean) => active ? "animate-pulse-soft" : ""
     },
     { 
       id: 'lab' as ViewType, 
-      icon: Waves, 
+      icon: ThermometerSnowflake, 
       label: 'Laboratório',
       iconClass: () => "animate-bobbing-hover"
     },
     { 
       id: 'field' as ViewType, 
-      icon: MapPin, 
+      icon: ClipboardList, 
       label: 'Gestão',
       iconClass: () => "animate-bounce-hover"
     },
@@ -56,7 +56,7 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
     <div className="w-32 bg-[#1E562F] flex flex-col h-screen sticky top-0 shadow-2xl z-50 border-r border-white/5">
       <div className="py-8 flex flex-col items-center gap-2">
         <div className="bg-white p-3 rounded-2xl shadow-xl mb-2">
-          <Thermometer className="text-[#1E562F]" size={32} strokeWidth={2.5} />
+          <Thermometer className="text-[#1E562F]" size={32} strokeWidth={1.5} />
         </div>
         <h1 className="text-[10px] font-black text-white uppercase tracking-[0.2em] text-center px-2">AçaíThermal</h1>
       </div>
@@ -82,10 +82,10 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
               )}>
                 <item.icon 
                   size={32} 
-                  strokeWidth={isActive ? 2.5 : 2}
+                  strokeWidth={1.5}
                   className={cn(
                     "transition-all duration-300",
-                    isActive ? "drop-shadow-[0_0_8px_rgba(30,86,47,0.3)]" : ""
+                    isActive ? "drop-shadow-[0_0_8px_rgba(30,86,47,0.3)]" : "group-hover:text-white"
                   )}
                 />
               </div>
