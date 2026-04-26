@@ -10,6 +10,7 @@ import Settings from '@/components/Settings';
 import TechnicalMemorial from '@/components/TechnicalMemorial';
 import DashboardStats from '@/components/DashboardStats';
 import BatedoresDatabase from '@/components/BatedoresDatabase';
+import FoodSafetyGuide from '@/components/FoodSafetyGuide';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
@@ -75,6 +76,8 @@ const Index = () => {
         );
       case 'database':
         return <BatedoresDatabase onSimulate={handleSimulate} />;
+      case 'safety_guide':
+        return <FoodSafetyGuide />;
       case 'security':
         return <SafetyStandards />;
       case 'history':

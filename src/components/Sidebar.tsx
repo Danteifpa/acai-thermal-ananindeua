@@ -1,11 +1,21 @@
 "use client";
 
 import React from 'react';
-import { LayoutDashboard, History, Settings, Thermometer, ShieldCheck, BookOpen, Database, Info } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  History, 
+  Settings, 
+  Thermometer, 
+  ShieldCheck, 
+  BookOpen, 
+  Database, 
+  Info,
+  GraduationCap
+} from 'lucide-react';
 import { cn } from "@/lib/utils";
 import ChallengeMode from './ChallengeMode';
 
-export type ViewType = 'dashboard' | 'validations' | 'history' | 'security' | 'settings' | 'memorial' | 'database' | 'about';
+export type ViewType = 'dashboard' | 'validations' | 'history' | 'security' | 'settings' | 'memorial' | 'database' | 'about' | 'safety_guide';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -16,7 +26,8 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   const menuItems = [
     { id: 'dashboard' as ViewType, icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'database' as ViewType, icon: Database, label: 'Base de Batedores' },
-    { id: 'security' as ViewType, icon: ShieldCheck, label: 'Segurança' },
+    { id: 'safety_guide' as ViewType, icon: GraduationCap, label: 'Guia de Segurança' },
+    { id: 'security' as ViewType, icon: ShieldCheck, label: 'Padrões Técnicos' },
     { id: 'history' as ViewType, icon: History, label: 'Histórico' },
     { id: 'memorial' as ViewType, icon: BookOpen, label: 'Memorial Técnico' },
     { id: 'about' as ViewType, icon: Info, label: 'Sobre o Projeto' },
