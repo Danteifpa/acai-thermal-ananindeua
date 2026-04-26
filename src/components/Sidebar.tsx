@@ -24,11 +24,14 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
 
   return (
     <div className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-screen sticky top-0">
-      <div className="p-6 flex items-center gap-3">
-        <div className="bg-purple-600 p-2 rounded-lg">
-          <Thermometer className="text-white" size={24} />
+      <div className="p-6 flex flex-col gap-1">
+        <div className="flex items-center gap-3">
+          <div className="bg-purple-600 p-2 rounded-lg">
+            <Thermometer className="text-white" size={24} />
+          </div>
+          <h1 className="text-xl font-bold text-white tracking-tight">AçaíThermal</h1>
         </div>
-        <h1 className="text-xl font-bold text-white tracking-tight">AçaíThermal</h1>
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-12">BCT / IFPA 2026</p>
       </div>
       
       <nav className="flex-1 px-4 space-y-2 mt-4">
@@ -51,10 +54,10 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
 
       <div className="p-4 border-t border-slate-800">
         <div className="bg-slate-900 rounded-xl p-4">
-          <p className="text-xs text-slate-500 uppercase font-bold mb-2">Status do Sistema</p>
-          <div className="flex items-center gap-2">
+          <p className="text-xs text-slate-500 uppercase font-bold mb-2 text-center">IFPA Ananindeua</p>
+          <div className="flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm text-slate-300">Monitoramento Ativo</span>
+            <span className="text-xs text-slate-300">Monitoramento Ativo</span>
           </div>
         </div>
       </div>
