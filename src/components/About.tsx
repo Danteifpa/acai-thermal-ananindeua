@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { Users, GraduationCap, Calendar, Info } from 'lucide-react';
+import { Users, GraduationCap, Info } from 'lucide-react';
 
 const About = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-1">
-        <h1 className="text-4xl font-black text-white tracking-tight">Sobre o Projeto</h1>
-        <p className="text-slate-400 text-lg">Inovação tecnológica aplicada à segurança alimentar.</p>
+        <h1 className="text-4xl font-black text-white tracking-tight">Sobre o AçaíThermal</h1>
+        <p className="text-slate-400 text-lg">Tecnologia e Ciência para a Segurança Alimentar.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -37,30 +37,26 @@ const About = () => {
         <Card className="bg-slate-900 border-slate-800 p-8 space-y-6">
           <div className="flex items-center gap-3 text-blue-400">
             <GraduationCap size={24} />
-            <h3 className="text-xl font-bold">Instituição e Propósito</h3>
+            <h3 className="text-xl font-bold">Objetivo Acadêmico</h3>
           </div>
           <p className="text-slate-400 leading-relaxed">
-            Projeto integrador desenvolvido para o <span className="text-white font-semibold">IFPA - Campus Ananindeua</span>, 
-            focado na aplicação de física térmica e tecnologia para a segurança alimentar na batedura do açaí.
+            Projeto desenvolvido para a <span className="text-white font-semibold">Feira de Física do IFPA 2026</span>, 
+            focado na validação térmica do processamento de açaí. O sistema utiliza modelos matemáticos para garantir a segurança biológica do produto final.
           </p>
           <div className="flex items-center gap-4 pt-4 border-t border-slate-800">
             <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <Calendar size={16} />
-              Ano: 2026
-            </li>
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
               <Info size={16} />
-              Versão 1.0
+              <span>Versão 1.0 - 2026</span>
             </div>
           </div>
         </Card>
       </div>
 
-      <Card className="bg-purple-600/5 border-purple-600/20 p-6">
-        <p className="text-slate-400 text-sm text-center italic">
-          "Tecnologia a serviço da saúde pública e da valorização da cultura regional do Pará."
+      <footer className="pt-12 text-center">
+        <p className="text-slate-500 text-sm font-medium">
+          © 2026 - Desenvolvido no IFPA Campus Ananindeua
         </p>
-      </Card>
+      </footer>
     </div>
   );
 };
