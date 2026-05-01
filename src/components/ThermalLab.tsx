@@ -94,17 +94,6 @@ const ThermalLab = ({
         <span className="text-[9px] font-black text-[#1E562F] uppercase tracking-widest">BCT - Termodinâmica Aplicada</span>
       </div>
 
-      {/* Safety Timer Overlay */}
-      {isBlanching && (
-        <div className="absolute top-6 right-6 bg-amber-500 text-white px-4 py-2 rounded-2xl flex items-center gap-3 shadow-lg z-30 animate-in slide-in-from-top-4">
-          <Timer size={20} className="animate-spin" />
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black uppercase tracking-widest opacity-80">Branqueamento</span>
-            <span className="text-lg font-black font-mono leading-none">{blanchingTimer}s / 10s</span>
-          </div>
-        </div>
-      )}
-
       {/* Beaker Container */}
       <div className="relative scale-100">
         <div className="absolute -left-6 top-0 w-8 h-full bg-gradient-to-r from-white/30 to-transparent blur-md rounded-full z-20 pointer-events-none" />
@@ -118,7 +107,7 @@ const ThermalLab = ({
           {/* Líquido Açaí */}
           <div 
             className="absolute bottom-0 left-0 right-0 rounded-b-[36px] transition-all duration-1000 ease-in-out overflow-hidden bg-[#4A148C] shadow-inner"
-            style={{ height: `${Math.min(95, 25 + (volume / 50) * 70)}%` }}
+            style={{ height: `${Math.min(95, 25 + (volume / 30) * 70)}%` }}
           >
             <div className="absolute top-0 left-0 w-full h-6 bg-white/10" />
             
@@ -151,6 +140,9 @@ const ThermalLab = ({
                 }}
               />
             </div>
+          </div>
+          <div className="mt-2 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-sm">
+            <span className="text-[10px] font-black lcd-display">{temp.toFixed(1)}°C</span>
           </div>
         </div>
 
