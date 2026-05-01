@@ -45,7 +45,10 @@ const Index = () => {
           <div className="animate-in fade-in duration-500 max-w-7xl mx-auto">
             <HomeDashboard 
               records={records} 
-              onStartSimulation={() => setCurrentView('lab')} 
+              onStartSimulation={() => {
+                setSelectedBatedor(null);
+                setCurrentView('lab');
+              }} 
             />
           </div>
         );
