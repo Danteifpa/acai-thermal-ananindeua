@@ -14,7 +14,7 @@ import {
   ClipboardCheck,
   Zap,
   Timer,
-  Thermometer
+  Target
 } from 'lucide-react';
 import ThermalLab from './ThermalLab';
 import ThermalChart from './ThermalChart';
@@ -54,36 +54,34 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     } else if (blanchingTimer >= 10) {
       setIsValidated(true);
       setIsBlanching(false);
-      showSuccess("Validated by Thermodynamic Modeling (52.5°C reached)");
+      if (physics.finalTemp >= 52.5) {
+        showSuccess("Validated by Thermodynamic Modeling (52.5°C reached)");
+      } else {
+        showError(`AVISO: Temperatura de equilíbrio insuficiente (${physics.finalTemp.toFixed(1)}°C).`);
+      }
     }
     return () => clearInterval(interval);
   }, [isBlanching, blanchingTimer]);
 
   const physics = useMemo(() => {
-    // Equação de Equilíbrio Térmico: m1*c1*(T1 - Tf) = m2*c2*(Tf - T2)
-    // m1 = volumeAgua, c1 = 4.18 (água), T1 = 80
-    // m2 = volumeFruto, c2 = 3.7 (açaí), T2 = 25
-    const c_agua = 4.18;
-    const c_acai = 3.7;
-    const T_agua = 80;
-    const T_acai = 25;
+    // Constantes do Artigo
+    const c_agua = 4.18; // kJ/kg·K
+    const c_acai = 3.7;  // kJ/kg·K
+    const T_agua = 80;   // °C
+    const T_acai = 25;   // °C (Ambiente)
 
-    // Tf = (m1*c1*T1 + m2*c2*T2) / (m1*c1 + m2*c2)
+    // Equação de Equilíbrio: Tf = (m1*c1*T1 + m2*c2*T2) / (m1*c1 + m2*c2)
     const finalTemp = (volumeAgua * c_agua * T_agua + volumeFruto * c_acai * T_acai) / 
                       (volumeAgua * c_agua + volumeFruto * c_acai);
     
-    // Constante de resfriamento (h) baseada no material para o gráfico
-    const h = material === 'Metal' ? 0.0005 : 0.0035; // Metal mantém, Plástico perde rápido
+    // Coeficiente de perda térmica (h) - Artigo Fig. 3
+    const h = material === 'Metal' ? 0.0005 : 0.0045; 
     
     const isSafe = finalTemp >= 52.5 && isValidated;
     
     let failureReason = "";
     if (finalTemp < 52.5) {
-      if (volumeAgua < 8.5 && volumeFruto >= 14) {
-        failureReason = "Thermal Failure: O balanço energético é insuficiente para inativar o parasita (Volume de água < 8.5L).";
-      } else {
-        failureReason = "A temperatura de equilíbrio calculada está abaixo do limite crítico de 52.5°C.";
-      }
+      failureReason = `AVISO: Temperatura de equilíbrio insuficiente (${finalTemp.toFixed(1)}°C). Alvo de 52,5°C do artigo não atingido, apesar da água estar a 80°C.`;
     }
 
     return { h, finalTemp, isSafe, failureReason };
@@ -118,6 +116,16 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr_1fr] gap-8 max-w-[1600px] mx-auto items-start">
       
       <div className="space-y-6">
+        {/* Painel de Alvo Científico */}
+        <div className="bg-[#1E562F] text-white p-6 rounded-[2rem] shadow-xl shadow-[#1E562F]/20 border border-white/10">
+          <div className="flex items-center gap-3 mb-2">
+            <Target size={20} className="text-emerald-400" />
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Referência Científica</h4>
+          </div>
+          <p className="text-xs font-medium opacity-80 mb-1">Temperatura de Equilíbrio (Alvo do Artigo):</p>
+          <p className="text-4xl font-black tracking-tighter">52.5°C</p>
+        </div>
+
         <div className="clinical-card p-8 space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
             <ClipboardCheck className="text-[#1E562F]" size={20} />
@@ -143,7 +151,7 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
         <div className="clinical-card p-8 space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
             <Activity className="text-[#1E562F]" size={20} />
-            <h2 className="ifpa-title text-sm">Modelagem Física</h2>
+            <h2 className="ifpa-title text-sm">Parâmetros de Massa</h2>
           </div>
           
           <div className="space-y-6">
@@ -171,14 +179,14 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
                   onClick={() => setMaterial('Metal')}
                   className={cn("h-12 rounded-xl font-bold text-[10px]", material === 'Metal' ? "bg-[#1E562F]" : "border-slate-200")}
                 >
-                  AÇO INOX (k=15)
+                  AÇO INOX (Plateau)
                 </Button>
                 <Button 
                   variant={material === 'Plástico' ? 'default' : 'outline'}
                   onClick={() => setMaterial('Plástico')}
                   className={cn("h-12 rounded-xl font-bold text-[10px]", material === 'Plástico' ? "bg-[#1E562F]" : "border-slate-200")}
                 >
-                  POLÍMERO (k=0.38)
+                  POLÍMERO (Decaimento)
                 </Button>
               </div>
             </div>
@@ -256,16 +264,16 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
               <p className="text-xs leading-relaxed font-medium text-slate-800">
                 {physics.isSafe 
                   ? "Validated by Thermodynamic Modeling (52.5°C reached)"
-                  : physics.failureReason || "O processo não atingiu o equilíbrio térmico de segurança (52.5°C)."}
+                  : physics.failureReason}
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 pt-4">
               <div className="bg-white/50 p-4 rounded-xl border border-black/5">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Temp. Equilíbrio Calculada</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Equilíbrio Calculado</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-2xl font-black lcd-display">{physics.finalTemp.toFixed(1)}°C</p>
-                  <span className="text-[10px] font-bold text-slate-400">Target: 52.5°C</span>
+                  <span className="text-[10px] font-bold text-slate-400">Alvo: 52.5°C</span>
                 </div>
               </div>
             </div>
