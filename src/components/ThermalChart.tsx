@@ -10,7 +10,6 @@ import {
   Tooltip, 
   ResponsiveContainer, 
   ReferenceLine,
-  Area,
   ComposedChart
 } from 'recharts';
 
@@ -33,62 +32,55 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
     };
   });
 
-  const color = isSafe ? "#39FF14" : "#FF3131";
+  const color = isSafe ? "#39FF14" : "#ef4444";
 
   return (
-    <div className="nasa-panel p-6 space-y-4 relative overflow-hidden oscilloscope-grid">
-      <div className="flex justify-between items-center relative z-10">
-        <div className="space-y-1">
-          <h3 className="text-xs font-black text-[#39FF14] uppercase tracking-[0.3em] neon-text-glow">Telemetria Térmica</h3>
-          <p className="text-[9px] text-[#39FF14]/50 font-bold uppercase">Sensor: Newton_Cooling_Probe_01</p>
+    <div className="glass-panel p-5 space-y-4 relative overflow-hidden">
+      <div className="flex justify-between items-center">
+        <div className="space-y-0.5">
+          <h3 className="text-[9px] font-black text-[#39FF14] uppercase tracking-widest">Curva de Resfriamento</h3>
+          <p className="text-[7px] text-slate-600 font-bold uppercase">Modelo: Newton_Cooling_v1</p>
         </div>
-        <div className="text-[9px] font-black text-[#39FF14]/30 uppercase">Frequência: 60Hz</div>
       </div>
 
-      <div className="h-64 w-full font-mono relative z-10">
+      <div className="h-56 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="0" stroke="rgba(57, 255, 20, 0.1)" />
+          <ComposedChart data={data} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="0" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
             <XAxis 
               dataKey="time" 
-              axisLine={{ stroke: '#39FF14', strokeWidth: 1 }} 
-              tickLine={{ stroke: '#39FF14' }} 
-              tick={{ fontSize: 10, fill: '#39FF14', fontWeight: 'bold' }}
+              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }} 
+              tickLine={false} 
+              tick={{ fontSize: 8, fill: '#475569' }}
             />
             <YAxis 
               domain={[20, 85]} 
-              axisLine={{ stroke: '#39FF14', strokeWidth: 1 }} 
-              tickLine={{ stroke: '#39FF14' }} 
-              tick={{ fontSize: 10, fill: '#39FF14', fontWeight: 'bold' }}
+              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }} 
+              tickLine={false} 
+              tick={{ fontSize: 8, fill: '#475569' }}
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#000', border: '1px solid #39FF14', color: '#39FF14' }}
-              itemStyle={{ color: '#39FF14', fontSize: '10px' }}
-              labelStyle={{ color: '#39FF14', fontWeight: 'bold', fontSize: '10px' }}
+              contentStyle={{ backgroundColor: '#0E1117', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#39FF14', fontSize: '10px' }}
+              itemStyle={{ color: '#39FF14' }}
             />
             
             <Line 
               type="monotone" 
               dataKey="temp" 
               stroke={color} 
-              strokeWidth={2} 
+              strokeWidth={1.5} 
               dot={false}
-              animationDuration={2000}
-              style={{ filter: `drop-shadow(0 0 5px ${color})` }}
+              animationDuration={1000}
             />
 
             <ReferenceLine 
               y={52.5} 
-              stroke="#00FFFF" 
+              stroke="rgba(255, 255, 255, 0.2)" 
               strokeDasharray="3 3" 
-              label={{ position: 'right', value: 'CRITICAL_LIMIT', fill: '#00FFFF', fontSize: 8, fontWeight: 'bold' }} 
+              label={{ position: 'right', value: '52.5°C', fill: 'rgba(255, 255, 255, 0.3)', fontSize: 7 }} 
             />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
-
-      <div className="absolute bottom-2 right-4 text-[8px] text-[#39FF14]/20 font-black uppercase">
-        NASA_SCIENTIFIC_VISUALIZATION_ENGINE
       </div>
     </div>
   );

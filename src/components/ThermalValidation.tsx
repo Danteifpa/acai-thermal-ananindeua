@@ -24,7 +24,6 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
   const [isSaving, setIsSaving] = useState(false);
-  const [isCalibrating, setIsCalibrating] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -33,13 +32,6 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
       setMaterial(initialData.material_padrao || 'Plástico');
     }
   }, [initialData]);
-
-  // Simulação de calibração ao mudar valores
-  useEffect(() => {
-    setIsCalibrating(true);
-    const timer = setTimeout(() => setIsCalibrating(false), 500);
-    return () => clearTimeout(timer);
-  }, [volume, material]);
 
   const physics = useMemo(() => {
     const cp = material === 'Metal' ? 0.50 : 2.30;
@@ -60,72 +52,64 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
         status_sanitario: physics.isSafe ? 'Processo Seguro' : 'Risco Biológico' 
       }]);
       if (error) throw error;
-      showSuccess("DADOS_SINCRONIZADOS_COM_SUCESSO");
+      showSuccess("DADOS_SINCRONIZADOS");
       onRecordSaved();
-    } catch (err: any) { showError("FALHA_NA_MISSÃO: " + err.message); } finally { setIsSaving(false); }
+    } catch (err: any) { showError(err.message); } finally { setIsSaving(false); }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr_1.2fr] gap-8 max-w-[1600px] mx-auto items-start font-mono">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr_1.2fr] gap-6 max-w-[1600px] mx-auto items-start font-mono">
       
-      {/* Coluna 1: Console de Comando */}
+      {/* Column 1: Controls */}
       <div className="space-y-6">
-        <div className="nasa-panel p-8 space-y-8 relative overflow-hidden">
-          <div className="flex items-center gap-3 border-b border-[#39FF14]/30 pb-4">
-            <Terminal className="text-[#39FF14]" size={20} />
-            <h2 className="text-lg font-black tracking-widest uppercase neon-text-glow">Console de Comando</h2>
+        <div className="glass-panel p-6 space-y-8">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <Terminal className="text-[#39FF14]" size={18} />
+            <h2 className="text-sm font-black uppercase tracking-widest neon-text">Configuração</h2>
           </div>
           
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <Label className="text-[#39FF14]/50 text-[10px] font-black uppercase tracking-widest">ID_DA_UNIDADE_DE_CAMPO</Label>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Unidade de Campo</Label>
               <input 
                 type="text"
                 value={nomeBatedouro}
                 onChange={(e) => setNomeBatedouro(e.target.value)}
-                className="w-full bg-black border border-[#39FF14]/50 text-[#39FF14] p-4 focus:border-[#39FF14] outline-none transition-all font-mono text-sm"
-                placeholder="> AGUARDANDO_INPUT..."
+                className="w-full bg-black/50 border border-white/10 text-[#39FF14] p-3 focus:border-[#39FF14]/50 outline-none transition-all text-xs rounded-[5px]"
+                placeholder="> INPUT_ID..."
               />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex justify-between items-end">
-                <Label className="text-[#39FF14]/50 text-[10px] font-black uppercase tracking-widest">Volume_Amostra (L)</Label>
-                <span className="text-[#39FF14] font-black text-2xl neon-text-glow">{volume}.00</span>
+                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume (L)</Label>
+                <span className="text-[#39FF14] font-black text-xl">{volume}</span>
               </div>
-              <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} className="py-2" />
-              {isCalibrating && (
-                <div className="space-y-1">
-                  <div className="h-1 w-full bg-[#39FF14]/10 overflow-hidden">
-                    <div className="h-full bg-[#39FF14] animate-progress-infinite" style={{ width: '30%' }} />
-                  </div>
-                  <p className="text-[8px] text-[#39FF14] animate-pulse">CALIBRANDO_SENSORES...</p>
-                </div>
-              )}
+              <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} />
             </div>
 
-            <div className="space-y-4">
-              <Label className="text-[#39FF14]/50 text-[10px] font-black uppercase tracking-widest">Material_do_Recipiente</Label>
+            <div className="space-y-3">
+              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Material</Label>
               <div className="grid grid-cols-1 gap-2">
                 <button 
                   onClick={() => setMaterial('Metal')}
                   className={cn(
-                    "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black",
-                    material === 'Metal' ? "bg-[#39FF14]/20 border-[#39FF14] text-[#39FF14]" : "bg-black border-[#39FF14]/20 text-[#39FF14]/40 hover:border-[#39FF14]/50"
+                    "flex items-center justify-between p-3 border transition-all uppercase text-[10px] font-black rounded-[5px]",
+                    material === 'Metal' ? "bg-[#39FF14]/10 border-[#39FF14]/50 text-[#39FF14]" : "bg-transparent border-white/10 text-slate-500 hover:border-white/20"
                   )}
                 >
-                  <span>[01] AÇO_INOXIDÁVEL</span>
-                  {material === 'Metal' && <div className="w-2 h-2 bg-[#39FF14] shadow-[0_0_5px_#39FF14]" />}
+                  <span>Aço Inoxidável</span>
+                  {material === 'Metal' && <div className="w-1.5 h-1.5 bg-[#39FF14] shadow-[0_0_5px_#39FF14]" />}
                 </button>
                 <button 
                   onClick={() => setMaterial('Plástico')}
                   className={cn(
-                    "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black",
-                    material === 'Plástico' ? "bg-[#00FFFF]/20 border-[#00FFFF] text-[#00FFFF]" : "bg-black border-[#00FFFF]/20 text-[#00FFFF]/40 hover:border-[#00FFFF]/50"
+                    "flex items-center justify-between p-3 border transition-all uppercase text-[10px] font-black rounded-[5px]",
+                    material === 'Plástico' ? "bg-[#39FF14]/10 border-[#39FF14]/50 text-[#39FF14]" : "bg-transparent border-white/10 text-slate-500 hover:border-white/20"
                   )}
                 >
-                  <span>[02] POLÍMERO_TÉCNICO</span>
-                  {material === 'Plástico' && <div className="w-2 h-2 bg-[#00FFFF] shadow-[0_0_5px_#00FFFF]" />}
+                  <span>Polímero Técnico</span>
+                  {material === 'Plástico' && <div className="w-1.5 h-1.5 bg-[#39FF14] shadow-[0_0_5px_#39FF14]" />}
                 </button>
               </div>
             </div>
@@ -134,22 +118,21 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
           <Button 
             onClick={handleSave} 
             disabled={isSaving} 
-            className="w-full bg-[#39FF14] hover:bg-[#32e012] text-black h-16 font-black uppercase tracking-widest transition-all active:scale-95"
+            className="w-full bg-[#39FF14] hover:bg-[#32e012] text-black h-12 font-black uppercase tracking-widest transition-all rounded-[5px]"
           >
-            {isSaving ? <Loader2 className="animate-spin" /> : "EXECUTAR_VALIDAÇÃO_TÉCNICA"}
+            {isSaving ? <Loader2 className="animate-spin" /> : "Validar Processo"}
           </Button>
         </div>
       </div>
 
-      {/* Coluna 2: Telemetria Central */}
-      <div className="space-y-8">
-        <div className="nasa-panel p-8 space-y-8 relative overflow-hidden">
-          <div className="flex justify-between items-center border-b border-[#39FF14]/30 pb-4">
+      {/* Column 2: Simulation */}
+      <div className="space-y-6">
+        <div className="glass-panel p-6 space-y-6">
+          <div className="flex justify-between items-center border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
-              <Cpu className="text-[#39FF14]" size={20} />
-              <h3 className="font-black text-[#39FF14] uppercase tracking-widest text-sm neon-text-glow">Visualização de Telemetria</h3>
+              <Cpu className="text-[#39FF14]" size={18} />
+              <h3 className="font-black text-[#39FF14] uppercase tracking-widest text-xs">Telemetria Visual</h3>
             </div>
-            <div className="text-[10px] text-[#39FF14]/50">REF: NASA_IFPA_2026</div>
           </div>
 
           <ThermalLab 
@@ -158,62 +141,61 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
             particleSpeed={physics.particleSpeed} 
           />
 
-          {/* Displays Digitais NASA */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="nasa-display space-y-1">
-              <p className="text-[8px] font-black text-[#00FFFF]/50 uppercase tracking-widest">TEMP_FINAL</p>
-              <p className="text-2xl font-black">{physics.finalTemp.toFixed(2)}°C</p>
+            <div className="bg-black/40 border border-white/10 p-4 rounded-[5px] space-y-1">
+              <p className="text-[8px] font-bold text-slate-500 uppercase">Temp_Final</p>
+              <p className="text-xl font-black text-[#39FF14]">{physics.finalTemp.toFixed(1)}°C</p>
             </div>
-            <div className="nasa-display space-y-1 border-[#39FF14]/50 text-[#39FF14]">
-              <p className="text-[8px] font-black text-[#39FF14]/50 uppercase tracking-widest">ENERGIA_Q</p>
-              <p className="text-2xl font-black">{(physics.q / 1000).toFixed(1)}kJ</p>
+            <div className="bg-black/40 border border-white/10 p-4 rounded-[5px] space-y-1">
+              <p className="text-[8px] font-bold text-slate-500 uppercase">Energia_Q</p>
+              <p className="text-xl font-black text-[#39FF14]">{(physics.q / 1000).toFixed(0)}kJ</p>
             </div>
-            <div className="nasa-display space-y-1 border-white/30 text-white">
-              <p className="text-[8px] font-black text-white/50 uppercase tracking-widest">CONST_K</p>
-              <p className="text-2xl font-black">{physics.k.toFixed(4)}</p>
+            <div className="bg-black/40 border border-white/10 p-4 rounded-[5px] space-y-1">
+              <p className="text-[8px] font-bold text-slate-500 uppercase">Const_K</p>
+              <p className="text-xl font-black text-[#39FF14]">{physics.k.toFixed(4)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Coluna 3: Análise de Missão */}
-      <div className="space-y-8">
+      {/* Column 3: Analysis */}
+      <div className="space-y-6">
         <ThermalChart k={physics.k} isSafe={physics.isSafe} />
 
         <div className={cn(
-          "p-6 border transition-all duration-500",
-          physics.isSafe ? "bg-[#39FF14]/10 border-[#39FF14]" : "bg-[#FF3131]/10 border-[#FF3131]"
+          "p-5 border transition-all duration-500 rounded-[5px]",
+          physics.isSafe ? "bg-[#39FF14]/5 border-[#39FF14]/30" : "bg-red-500/5 border-red-500/30"
         )}>
           <div className="flex items-center gap-4">
             <div className={cn(
-              "p-3",
-              physics.isSafe ? "bg-[#39FF14] text-black" : "bg-[#FF3131] text-white"
+              "p-2 rounded-[5px]",
+              physics.isSafe ? "bg-[#39FF14] text-black" : "bg-red-500 text-white"
             )}>
-              {physics.isSafe ? <ShieldCheck size={24} /> : <AlertTriangle size={24} />}
+              {physics.isSafe ? <ShieldCheck size={20} /> : <AlertTriangle size={20} />}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <h4 className={cn(
-                "font-black uppercase tracking-widest text-[10px]",
-                physics.isSafe ? "text-[#39FF14]" : "text-[#FF3131]"
+                "font-black uppercase tracking-widest text-[9px]",
+                physics.isSafe ? "text-[#39FF14]" : "text-red-500"
               )}>
-                STATUS_DA_MISSÃO
+                Status Sanitário
               </h4>
-              <p className="text-sm font-black">
-                {physics.isSafe ? "SUCESSO: AMBOSTRA_SEGURA" : "FALHA: RISCO_BIOLÓGICO"}
+              <p className="text-xs font-black">
+                {physics.isSafe ? "PROCESSO SEGURO" : "RISCO BIOLÓGICO"}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="nasa-panel p-6 space-y-4">
-          <div className="flex items-center gap-2 text-[#00FFFF]">
-            <Terminal size={16} />
-            <h4 className="text-[10px] font-black uppercase tracking-widest">LOG_DE_ENGENHARIA</h4>
+        <div className="glass-panel p-5 space-y-3">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Terminal size={14} />
+            <h4 className="text-[9px] font-black uppercase tracking-widest">Log de Sistema</h4>
           </div>
-          <p className="text-[10px] text-[#00FFFF]/70 leading-relaxed">
-            > ANALISANDO_DECAIMENTO_EXPONENCIAL...<br/>
-            > VOLUME_DENTRO_DOS_PARÂMETROS...<br/>
-            > RECOMENDAÇÃO: MANTER_PROTOCOLO_52.5C.
+          <p className="text-[9px] text-slate-600 leading-relaxed">
+            > Monitorando decaimento térmico...<br/>
+            > Parâmetros validados via Newton...<br/>
+            > Estabilidade térmica confirmada.
           </p>
         </div>
       </div>
