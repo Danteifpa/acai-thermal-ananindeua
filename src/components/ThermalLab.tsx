@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Bug, ShieldCheck, Zap } from 'lucide-react';
+import { Bug, ShieldCheck, Zap, Timer } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface ThermalLabProps {
@@ -10,6 +10,8 @@ interface ThermalLabProps {
   temp: number;
   isSafe: boolean;
   particleSpeed: number;
+  isBlanching?: boolean;
+  blanchingTimer?: number;
 }
 
 const Trypanosoma = ({ containerWidth, containerHeight, speed, isDissolving }: { 
@@ -48,11 +50,11 @@ const Trypanosoma = ({ containerWidth, containerHeight, speed, isDissolving }: {
     <div 
       className={cn(
         "absolute transition-all duration-[2000ms] ease-out",
-        isDissolving ? "text-emerald-400 scale-150 opacity-0 rotate-180" : "text-red-500/80 scale-100 opacity-100"
+        isDissolving ? "text-emerald-400/0 scale-150 opacity-0 rotate-180" : "text-red-500/80 scale-100 opacity-100"
       )}
       style={{ 
         transform: `translate(${pos.x}px, ${pos.y}px) ${isDissolving ? 'scale(1.5) rotate(180deg)' : ''}`,
-        filter: isDissolving ? 'blur(4px)' : 'none'
+        filter: isDissolving ? 'blur(8px)' : 'none'
       }}
     >
       <Bug size={12} className={cn(!isDissolving && "animate-pulse")} />
@@ -64,15 +66,16 @@ const ThermalLab = ({
   volume, 
   material, 
   temp, 
-  isSafe 
+  isSafe,
+  isBlanching,
+  blanchingTimer = 0
 }: ThermalLabProps) => {
-  const speed = useMemo(() => 0.2 + (temp / 80) * 4, [temp]);
+  const speed = useMemo(() => isSafe ? 0 : 0.2 + (temp / 80) * 4, [temp, isSafe]);
   const [showInactivation, setShowInactivation] = useState(false);
 
   useEffect(() => {
     if (isSafe) {
-      const timer = setTimeout(() => setShowInactivation(true), 1000);
-      return () => clearTimeout(timer);
+      setShowInactivation(true);
     } else {
       setShowInactivation(false);
     }
@@ -91,9 +94,19 @@ const ThermalLab = ({
         <span className="text-[9px] font-black text-[#1E562F] uppercase tracking-widest">BCT - Termodinâmica Aplicada</span>
       </div>
 
+      {/* Safety Timer Overlay */}
+      {isBlanching && (
+        <div className="absolute top-6 right-6 bg-amber-500 text-white px-4 py-2 rounded-2xl flex items-center gap-3 shadow-lg z-30 animate-in slide-in-from-top-4">
+          <Timer size={20} className="animate-spin" />
+          <div className="flex flex-col">
+            <span className="text-[8px] font-black uppercase tracking-widest opacity-80">Branqueamento</span>
+            <span className="text-lg font-black font-mono leading-none">{blanchingTimer}s / 10s</span>
+          </div>
+        </div>
+      )}
+
       {/* Beaker Container */}
       <div className="relative scale-100">
-        {/* Reflexo do Vidro / Metal */}
         <div className="absolute -left-6 top-0 w-8 h-full bg-gradient-to-r from-white/30 to-transparent blur-md rounded-full z-20 pointer-events-none" />
         
         <div className={cn(
@@ -148,10 +161,15 @@ const ThermalLab = ({
               <ShieldCheck size={48} />
             </div>
             <div className="mt-4 bg-white/90 backdrop-blur-md border-2 border-emerald-500 px-6 py-2 rounded-2xl shadow-xl">
-              <p className="text-emerald-600 font-black text-xs uppercase tracking-[0.2em]">100% Seguro</p>
+              <p className="text-emerald-600 font-black text-xs uppercase tracking-[0.2em]">Seguro para Consumo</p>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Reference Tag */}
+      <div className="absolute bottom-4 right-6 text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+        Protocolo baseado em Embrapa Amapá 2017 (COT 151)
       </div>
     </div>
   );

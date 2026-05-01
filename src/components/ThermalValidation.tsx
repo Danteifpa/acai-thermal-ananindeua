@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   Activity,
   BookOpen,
-  Zap
+  Zap,
+  Timer
 } from 'lucide-react';
 import ThermalLab from './ThermalLab';
 import ThermalChart from './ThermalChart';
@@ -24,6 +25,9 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
   const [isSaving, setIsSaving] = useState(false);
+  const [blanchingTimer, setBlanchingTimer] = useState(0);
+  const [isBlanching, setIsBlanching] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -33,26 +37,45 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
     }
   }, [initialData]);
 
+  // Lógica do Cronômetro de Segurança (Embrapa 80°C/10s)
+  useEffect(() => {
+    let interval: any;
+    if (isBlanching && blanchingTimer < 10) {
+      interval = setInterval(() => {
+        setBlanchingTimer(prev => prev + 1);
+      }, 1000);
+    } else if (blanchingTimer >= 10) {
+      setIsValidated(true);
+      setIsBlanching(false);
+      showSuccess("Protocolo Embrapa 80°C/10s concluído com sucesso!");
+    }
+    return () => clearInterval(interval);
+  }, [isBlanching, blanchingTimer]);
+
   const physics = useMemo(() => {
-    // Constantes físicas ajustadas para impacto visual na feira
-    const cp = material === 'Metal' ? 0.45 : 2.10; // Calor específico (J/g°C)
-    const baseK = material === 'Metal' ? 0.008 : 0.002; // Condutividade base
+    // Proporção Embrapa: 1L Polpa para 2L Água (Total = volume * 3)
+    const totalVolume = volume * 3; 
+    const cp = material === 'Metal' ? 0.45 : 2.10;
+    const baseK = material === 'Metal' ? 0.008 : 0.002;
     
-    // k = condutividade / (massa * calor_especifico)
-    // Simplificado: k diminui com o aumento do volume (inércia térmica)
-    const k = baseK / (cp * Math.pow(volume || 1, 0.25));
+    // k ajustado pela massa térmica total (água + polpa)
+    const k = baseK / (cp * Math.pow(totalVolume, 0.25));
     
     const finalTemp = 25 + (80 - 25) * Math.exp(-k * 600);
-    const particleSpeed = 0.5 + (((finalTemp - 25) / 55) * 4);
+    const particleSpeed = isValidated ? 0 : 0.5 + (((finalTemp - 25) / 55) * 4);
+    const q = totalVolume * 1000 * cp * (80 - finalTemp);
     
-    // Q = m * c * deltaT (Energia dissipada em Joules)
-    const q = volume * 1000 * cp * (80 - finalTemp);
-    
-    return { k, finalTemp, isSafe: finalTemp >= 52.5, q, particleSpeed };
-  }, [volume, material]);
+    return { k, finalTemp, isSafe: finalTemp >= 52.5 && isValidated, q, particleSpeed };
+  }, [volume, material, isValidated]);
+
+  const startValidation = () => {
+    if (!nomeBatedouro.trim()) { showError("Identificação da amostra é obrigatória."); return; }
+    setBlanchingTimer(0);
+    setIsValidated(false);
+    setIsBlanching(true);
+  };
 
   const handleSave = async () => {
-    if (!nomeBatedouro.trim()) { showError("Identificação da amostra é obrigatória."); return; }
     setIsSaving(true);
     try {
       const { error } = await supabase.from('amostras_termicas').insert([{ 
@@ -69,7 +92,6 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr_1.2fr] gap-8 max-w-[1600px] mx-auto items-start">
       
-      {/* Coluna 1: Parâmetros e Base Teórica */}
       <div className="space-y-6">
         <div className="clinical-card p-8 space-y-8">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
@@ -91,49 +113,65 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
 
             <div className="space-y-6">
               <div className="flex justify-between items-end">
-                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume (L)</Label>
+                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume de Polpa (L)</Label>
                 <span className="text-slate-800 font-black text-3xl lcd-display">{volume}.0</span>
               </div>
-              <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} />
+              <Slider value={[volume]} onValueChange={(val) => { setVolume(val[0]); setIsValidated(false); setBlanchingTimer(0); }} max={50} min={1} step={1} />
+              <p className="text-[9px] text-slate-400 italic">Simulando proporção 1:2 (Água: {volume * 2}L)</p>
             </div>
 
             <div className="space-y-4">
               <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Material do Recipiente</Label>
               <div className="grid grid-cols-1 gap-3">
                 <button 
-                  onClick={() => setMaterial('Metal')}
+                  onClick={() => { setMaterial('Metal'); setIsValidated(false); }}
                   className={cn(
-                    "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black rounded-xl",
+                    "flex flex-col p-4 border transition-all rounded-xl text-left",
                     material === 'Metal' ? "bg-[#1E562F]/5 border-[#1E562F] text-[#1E562F]" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
                   )}
                 >
-                  <span>Aço Inoxidável (Inox)</span>
-                  {material === 'Metal' && <Zap size={16} className="animate-pulse" />}
+                  <div className="flex justify-between items-center w-full">
+                    <span className="uppercase text-[10px] font-black">Aço Inoxidável (Inox)</span>
+                    {material === 'Metal' && <Zap size={16} className="animate-pulse" />}
+                  </div>
+                  <span className="text-[8px] mt-1 opacity-70">Recomendado Embrapa: Fácil higienização e prevenção de focos.</span>
                 </button>
                 <button 
-                  onClick={() => setMaterial('Plástico')}
+                  onClick={() => { setMaterial('Plástico'); setIsValidated(false); }}
                   className={cn(
-                    "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black rounded-xl",
+                    "flex flex-col p-4 border transition-all rounded-xl text-left",
                     material === 'Plástico' ? "bg-[#1E562F]/5 border-[#1E562F] text-[#1E562F]" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
                   )}
                 >
-                  <span>Polímero (Isolante)</span>
-                  {material === 'Plástico' && <ShieldCheck size={16} />}
+                  <div className="flex justify-between items-center w-full">
+                    <span className="uppercase text-[10px] font-black">Polímero (Isolante)</span>
+                    {material === 'Plástico' && <ShieldCheck size={16} />}
+                  </div>
+                  <span className="text-[8px] mt-1 opacity-70">Uso comum, porém com maior risco de biofilmes.</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <Button 
-            onClick={handleSave} 
-            disabled={isSaving} 
-            className="w-full bg-[#1E562F] hover:bg-[#164023] text-white h-16 font-black uppercase tracking-widest transition-all rounded-xl shadow-lg shadow-[#1E562F]/10"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : "Executar Validação"}
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={startValidation} 
+              disabled={isBlanching || isSaving} 
+              className="flex-1 bg-[#1E562F] hover:bg-[#164023] text-white h-16 font-black uppercase tracking-widest transition-all rounded-xl shadow-lg"
+            >
+              {isBlanching ? <Loader2 className="animate-spin" /> : "Iniciar Branqueamento"}
+            </Button>
+            {isValidated && (
+              <Button 
+                onClick={handleSave}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white h-16 px-6 rounded-xl shadow-lg"
+              >
+                <ShieldCheck size={24} />
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Card: Base Teórica */}
         <div className="clinical-card p-6 space-y-4 bg-slate-50/50">
           <div className="flex items-center gap-2 text-[#1E562F]">
             <BookOpen size={18} />
@@ -144,18 +182,13 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
               <p className="text-sm font-mono not-italic font-bold text-slate-800">Q = m · c · ΔT</p>
               <p className="text-[8px] uppercase mt-1 text-slate-400">Equação Fundamental da Calorimetria</p>
             </div>
-            <div className="bg-white p-4 rounded-lg border border-slate-200 text-center shadow-inner">
-              <p className="text-sm font-mono not-italic font-bold text-slate-800">T(t) = Tenv + (T0 - Tenv)e⁻ᵏᵗ</p>
-              <p className="text-[8px] uppercase mt-1 text-slate-400">Lei do Resfriamento de Newton</p>
-            </div>
             <p className="text-[9px] text-center">
-              A constante <span className="font-bold">k = {physics.k.toFixed(5)}</span> reflete a taxa de transferência de calor do sistema para o ambiente.
+              A constante <span className="font-bold">k = {physics.k.toFixed(5)}</span> reflete a taxa de transferência de calor considerando a massa térmica da água de branqueamento.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Coluna 2: Simulação */}
       <div className="space-y-8">
         <div className="clinical-card p-8 space-y-8">
           <div className="flex justify-between items-center border-b border-slate-100 pb-4">
@@ -163,16 +196,27 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
               <FlaskConical className="text-[#1E562F]" size={20} />
               <h3 className="ifpa-title text-sm">Simulação de Laboratório</h3>
             </div>
-            <div className="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full">
-              <span className="text-[8px] font-black text-slate-500 uppercase">k-Factor:</span>
-              <span className="text-[10px] font-mono font-bold text-[#1E562F]">{physics.k.toFixed(4)}</span>
+            <div className="flex items-center gap-4">
+              {isBlanching && (
+                <div className="flex items-center gap-2 bg-amber-50 text-amber-600 px-3 py-1 rounded-full border border-amber-100 animate-pulse">
+                  <Timer size={14} />
+                  <span className="text-xs font-black font-mono">{blanchingTimer}s / 10s</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full">
+                <span className="text-[8px] font-black text-slate-500 uppercase">k-Factor:</span>
+                <span className="text-[10px] font-mono font-bold text-[#1E562F]">{physics.k.toFixed(4)}</span>
+              </div>
             </div>
           </div>
 
           <ThermalLab 
             volume={volume} material={material} 
-            temp={physics.finalTemp} isSafe={physics.isSafe} 
+            temp={isBlanching ? 80 : physics.finalTemp} 
+            isSafe={physics.isSafe} 
             particleSpeed={physics.particleSpeed} 
+            isBlanching={isBlanching}
+            blanchingTimer={blanchingTimer}
           />
 
           <div className="grid grid-cols-3 gap-6">
@@ -197,7 +241,6 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
         </div>
       </div>
 
-      {/* Coluna 3: Gráfico */}
       <div className="space-y-8">
         <ThermalChart k={physics.k} isSafe={physics.isSafe} />
 
