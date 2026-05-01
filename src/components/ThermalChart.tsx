@@ -10,7 +10,8 @@ import {
   Tooltip, 
   ResponsiveContainer, 
   ReferenceLine,
-  ComposedChart
+  ComposedChart,
+  ReferenceArea
 } from 'recharts';
 
 interface ThermalChartProps {
@@ -39,7 +40,7 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
       <div className="flex justify-between items-center">
         <div className="space-y-1">
           <h3 className="ifpa-title text-[10px]">Curva de Resfriamento</h3>
-          <p className="text-[8px] text-slate-400 font-bold uppercase">Modelo Matemático: Newton</p>
+          <p className="text-[8px] text-slate-400 font-bold uppercase">Análise de Decaimento Térmico</p>
         </div>
       </div>
 
@@ -52,6 +53,7 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
               axisLine={{ stroke: '#e2e8f0' }} 
               tickLine={false} 
               tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
+              label={{ value: 'Minutos', position: 'insideBottomRight', offset: -5, fontSize: 8, fill: '#94a3b8' }}
             />
             <YAxis 
               domain={[20, 85]} 
@@ -64,20 +66,31 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
               itemStyle={{ color: '#1E562F', fontWeight: 'bold' }}
             />
             
+            {/* Área de Segurança */}
+            {isSafe && (
+              <ReferenceArea 
+                y1={52.5} 
+                y2={85} 
+                fill="#1E562F" 
+                fillOpacity={0.05} 
+              />
+            )}
+
             <Line 
               type="monotone" 
               dataKey="temp" 
               stroke={color} 
-              strokeWidth={2.5} 
+              strokeWidth={3} 
               dot={false}
-              animationDuration={1000}
+              animationDuration={1500}
             />
 
             <ReferenceLine 
               y={52.5} 
-              stroke="#94a3b8" 
+              stroke={isSafe ? "#1E562F" : "#e41b13"} 
               strokeDasharray="5 5" 
-              label={{ position: 'right', value: '52.5°C', fill: '#94a3b8', fontSize: 8, fontWeight: 'bold' }} 
+              strokeWidth={1}
+              label={{ position: 'right', value: 'LIMITE 52.5°C', fill: isSafe ? '#1E562F' : '#e41b13', fontSize: 7, fontWeight: 'black' }} 
             />
           </ComposedChart>
         </ResponsiveContainer>
