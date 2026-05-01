@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, Upload, Database, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, Play, Upload, Database, Trash2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { showSuccess, showError } from '@/utils/toast';
@@ -25,7 +25,7 @@ interface BatedoresDatabaseProps {
 const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
   const [batedores, setBatedores] = useState<Batedor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isImporting, setIsImporting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchBatedores = async () => {
     setIsLoading(true);
@@ -42,11 +42,16 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
 
   useEffect(() => { fetchBatedores(); }, []);
 
+  const clearDatabase = async () => {
+    const { error } = await supabase.from('batedores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) throw error;
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsImporting(true);
+    setIsProcessing(true);
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
@@ -54,34 +59,46 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
+        const rawData = XLSX.utils.sheet_to_json(ws);
 
-        const formattedData = data.map((row: any) => {
-          const volume = parseFloat(row['Unidade (Litros/Lata)']) || 0;
+        // 1. Limpeza Obrigatória
+        await clearDatabase();
+
+        // 2. Mapeamento Rígido e Tratamento de Erros
+        const formattedData = rawData.map((row: any) => {
+          const nome = row['1- Nome Fantasia'];
+          const volumeRaw = row['Unidade (Litros/Lata)'];
+          const volume = typeof volumeRaw === 'number' ? volumeRaw : parseFloat(String(volumeRaw).replace(',', '.'));
           const material = row['Armazenamento do fruto'] || 'Não Informado';
-          
+          const bairro = row['Bairro'] || 'Não Informado';
+
+          // Pula se não houver nome ou volume válido
+          if (!nome || isNaN(volume)) return null;
+
           let status = '✅ Conforme';
           if (volume < 8.5) status = '🔴 Risco: Volume Insuficiente';
           else if (material !== 'Metal' && material !== 'Tambores') status = '⚠️ Atenção: Material Isolante';
 
           return {
-            nome: row['1- Nome Fantasia'] || 'Sem Nome',
-            bairro: row['Bairro'] || 'Não Informado',
+            nome,
+            bairro,
             material_padrao: material,
             volume_padrao: volume,
             status_risco: status
           };
-        });
+        }).filter(Boolean);
 
+        // 3. Injeção via API (Upsert/Insert)
         const { error } = await supabase.from('batedores').insert(formattedData);
         if (error) throw error;
 
-        showSuccess(`${formattedData.length} batedouros importados com sucesso!`);
+        showSuccess(`Sucesso! ${formattedData.length} registros importados e validados.`);
         fetchBatedores();
       } catch (err: any) {
-        showError("Erro na importação: " + err.message);
+        showError("Falha no processamento: " + err.message);
       } finally {
-        setIsImporting(false);
+        setIsProcessing(false);
+        if (e.target) e.target.value = '';
       }
     };
     reader.readAsBinaryString(file);
@@ -89,84 +106,89 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
 
   return (
     <div className="space-y-6">
-      <header className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-50 p-3 rounded-xl text-[#1E562F]">
-            <Database size={24} />
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm gap-6">
+        <div className="flex items-center gap-5">
+          <div className="bg-[#1E562F] p-4 rounded-2xl text-white shadow-lg shadow-[#1E562F]/20">
+            <Database size={28} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Base de Dados Científica</h3>
-            <p className="text-xs text-slate-500 font-medium">{batedores.length} batedouros registrados no Supabase.</p>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Base de Dados da Pesquisa</h3>
+            <p className="text-sm text-slate-500 font-medium">
+              {batedores.length} batedouros sincronizados com o Supabase.
+            </p>
           </div>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full md:w-auto">
           <input
             type="file"
-            id="csv-upload"
+            id="csv-upload-strict"
             className="hidden"
             accept=".csv, .xlsx"
             onChange={handleFileUpload}
           />
           <Button 
             asChild
-            variant="outline" 
-            className="border-slate-200 text-slate-600 gap-2 h-12 px-6 rounded-xl font-bold cursor-pointer"
+            disabled={isProcessing}
+            className="flex-1 md:flex-none bg-[#1E562F] hover:bg-[#164023] text-white gap-3 h-14 px-8 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-[#1E562F]/20 transition-all hover:scale-105 cursor-pointer"
           >
-            <label htmlFor="csv-upload">
-              {isImporting ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-              Importar Pesquisa (CSV/XLSX)
+            <label htmlFor="csv-upload-strict">
+              {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
+              Reiniciar Importação
             </label>
           </Button>
         </div>
       </header>
 
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
         <Table>
           <TableHeader className="bg-slate-50">
-            <TableRow className="border-slate-200">
-              <TableHead className="text-slate-900 font-bold py-5 pl-6">Nome Fantasia</TableHead>
-              <TableHead className="text-slate-900 font-bold">Bairro</TableHead>
-              <TableHead className="text-slate-900 font-bold">Recipiente</TableHead>
-              <TableHead className="text-slate-900 font-bold">Volume (L)</TableHead>
-              <TableHead className="text-slate-900 font-bold">Status de Risco</TableHead>
-              <TableHead className="text-slate-900 font-bold text-right pr-6">Ação</TableHead>
+            <TableRow className="border-slate-200 hover:bg-transparent">
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px] py-6 pl-10">Nome Fantasia</TableHead>
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px]">Bairro</TableHead>
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px]">Recipiente</TableHead>
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px]">Volume</TableHead>
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px]">Status de Risco</TableHead>
+              <TableHead className="text-slate-900 font-black uppercase tracking-widest text-[10px] text-right pr-10">Ação</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-[#1E562F]" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-32"><Loader2 className="animate-spin mx-auto text-[#1E562F]" size={40} /></TableCell></TableRow>
             ) : batedores.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-20">
-                  <div className="flex flex-col items-center gap-3 text-slate-400">
-                    <Database size={48} strokeWidth={1} />
-                    <p className="font-medium">Nenhum dado no Supabase. Use o botão de importação acima.</p>
+                <TableCell colSpan={6} className="text-center py-32">
+                  <div className="flex flex-col items-center gap-4 text-slate-300">
+                    <AlertCircle size={64} strokeWidth={1} />
+                    <p className="text-lg font-bold">Nenhum dado persistido. Inicie a importação acima.</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : batedores.map((b) => (
-              <TableRow key={b.id} className="border-slate-100 hover:bg-slate-50 transition-colors">
-                <TableCell className="text-slate-900 font-bold pl-6">{b.nome}</TableCell>
-                <TableCell className="text-slate-500 text-sm">{b.bairro}</TableCell>
-                <TableCell><Badge variant="outline" className="border-slate-200 text-slate-600">{b.material_padrao}</Badge></TableCell>
-                <TableCell className="text-[#1E562F] font-mono font-bold">{b.volume_padrao}L</TableCell>
+              <TableRow key={b.id} className="border-slate-100 hover:bg-slate-50 transition-colors group">
+                <TableCell className="text-slate-900 font-bold pl-10 py-5">{b.nome}</TableCell>
+                <TableCell className="text-slate-500 text-sm font-medium">{b.bairro}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="border-slate-200 text-slate-500 font-bold px-3 py-1 rounded-lg">
+                    {b.material_padrao}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-[#1E562F] font-mono font-black text-lg">{b.volume_padrao}L</TableCell>
                 <TableCell>
                   <Badge className={
-                    b.status_risco?.includes('🔴') ? "bg-red-50 text-red-600 border-red-100" :
-                    b.status_risco?.includes('⚠️') ? "bg-amber-50 text-amber-600 border-amber-100" :
-                    "bg-emerald-50 text-emerald-600 border-emerald-100"
+                    b.status_risco?.includes('🔴') ? "bg-red-50 text-red-600 border-red-100 px-4 py-1.5 rounded-full font-bold" :
+                    b.status_risco?.includes('⚠️') ? "bg-amber-50 text-amber-600 border-amber-100 px-4 py-1.5 rounded-full font-bold" :
+                    "bg-emerald-50 text-emerald-600 border-emerald-100 px-4 py-1.5 rounded-full font-bold"
                   }>
                     {b.status_risco || '✅ Conforme'}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right pr-6">
+                <TableCell className="text-right pr-10">
                   <Button 
-                    size="sm" 
                     onClick={() => onSimulate(b)} 
-                    className="bg-[#1E562F] hover:bg-[#164023] text-white gap-2 rounded-xl transition-all shadow-sm"
+                    className="bg-[#1E562F] hover:bg-[#164023] text-white gap-2 h-11 px-6 rounded-xl transition-all shadow-md hover:scale-105 font-bold"
                   >
-                    <Play size={12} fill="currentColor" /> Simular
+                    <Play size={14} fill="currentColor" /> Simular
                   </Button>
                 </TableCell>
               </TableRow>
