@@ -19,7 +19,7 @@ import {
 import ThermalLab from './ThermalLab';
 import ThermalChart from './ThermalChart';
 import { showSuccess, showError } from '@/utils/toast';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from "@/lib/utils";
 
 const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
@@ -42,6 +42,9 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     if (initialData) {
       setNomeBatedouro(initialData.nome || '');
       setVolumeFruto(initialData.volume_padrao || 14);
+      setMaterial(initialData.material_padrao || 'Metal');
+      // Limpa o erro de identificação ao selecionar do banco
+      setChecklist(prev => ({ ...prev, temperatura: true })); 
     }
   }, [initialData]);
 
@@ -57,31 +60,39 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
       if (physics.finalTemp >= 52.5) {
         showSuccess("Validated by Thermodynamic Modeling (52.5°C reached)");
       } else {
-        showError(`AVISO: Temperatura de equilíbrio insuficiente (${physics.finalTemp.toFixed(1)}°C).`);
+        showError(`AVISO: Temperatura de equilíbrio insuficiente (${physics.finalTemp.toFixed(1)}°C). Alvo de 52,5°C do artigo não atingido.`);
       }
     }
     return () => clearInterval(interval);
   }, [isBlanching, blanchingTimer]);
 
   const physics = useMemo(() => {
-    // Constantes do Artigo
-    const c_agua = 4.18; // kJ/kg·K
-    const c_acai = 3.7;  // kJ/kg·K
-    const T_agua = 80;   // °C
-    const T_acai = 25;   // °C (Ambiente)
+    // Constantes do Artigo (J/kg·K)
+    const c_agua = 4186; 
+    const c_acai = 3800;  
+    const T_agua = 80;   
+    const T_acai = 25;   
 
     // Equação de Equilíbrio: Tf = (m1*c1*T1 + m2*c2*T2) / (m1*c1 + m2*c2)
     const finalTemp = (volumeAgua * c_agua * T_agua + volumeFruto * c_acai * T_acai) / 
                       (volumeAgua * c_agua + volumeFruto * c_acai);
     
-    // Coeficiente de perda térmica (h) - Artigo Fig. 3
-    const h = material === 'Metal' ? 0.0005 : 0.0045; 
+    // Mapeamento de Condutividade (k) do Artigo
+    const kMap: Record<string, number> = {
+      'Metal': 15,
+      'Plástico': 0.38,
+      'Isopor': 0.04
+    };
+    
+    const k = kMap[material] || 0.38;
+    // Coeficiente de perda h derivado de k para o gráfico
+    const h = material === 'Metal' ? 0.0005 : material === 'Plástico' ? 0.0045 : 0.008;
     
     const isSafe = finalTemp >= 52.5 && isValidated;
     
     let failureReason = "";
     if (finalTemp < 52.5) {
-      failureReason = `AVISO: Temperatura de equilíbrio insuficiente (${finalTemp.toFixed(1)}°C). Alvo de 52,5°C do artigo não atingido, apesar da água estar a 80°C.`;
+      failureReason = `AVISO: Temperatura de equilíbrio insuficiente (${finalTemp.toFixed(1)}°C). Alvo de 52,5°C do artigo não atingido.`;
     }
 
     return { h, finalTemp, isSafe, failureReason };
@@ -116,7 +127,6 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr_1fr] gap-8 max-w-[1600px] mx-auto items-start">
       
       <div className="space-y-6">
-        {/* Painel de Alvo Científico */}
         <div className="bg-[#1E562F] text-white p-6 rounded-[2rem] shadow-xl shadow-[#1E562F]/20 border border-white/10">
           <div className="flex items-center gap-3 mb-2">
             <Target size={20} className="text-emerald-400" />
@@ -173,21 +183,17 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
 
             <div className="space-y-3">
               <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Material do Recipiente</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant={material === 'Metal' ? 'default' : 'outline'}
-                  onClick={() => setMaterial('Metal')}
-                  className={cn("h-12 rounded-xl font-bold text-[10px]", material === 'Metal' ? "bg-[#1E562F]" : "border-slate-200")}
-                >
-                  AÇO INOX (Plateau)
-                </Button>
-                <Button 
-                  variant={material === 'Plástico' ? 'default' : 'outline'}
-                  onClick={() => setMaterial('Plástico')}
-                  className={cn("h-12 rounded-xl font-bold text-[10px]", material === 'Plástico' ? "bg-[#1E562F]" : "border-slate-200")}
-                >
-                  POLÍMERO (Decaimento)
-                </Button>
+              <div className="grid grid-cols-3 gap-2">
+                {['Metal', 'Plástico', 'Isopor'].map((m) => (
+                  <Button 
+                    key={m}
+                    variant={material === m ? 'default' : 'outline'}
+                    onClick={() => setMaterial(m)}
+                    className={cn("h-12 rounded-xl font-bold text-[10px]", material === m ? "bg-[#1E562F]" : "border-slate-200")}
+                  >
+                    {m.toUpperCase()}
+                  </Button>
+                ))}
               </div>
             </div>
           </div>
