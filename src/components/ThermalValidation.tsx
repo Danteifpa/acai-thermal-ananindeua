@@ -10,24 +10,19 @@ import {
   Box, 
   ShieldCheck, 
   Loader2, 
-  Info, 
   AlertTriangle,
   Activity,
-  Zap
+  Zap,
+  Cpu
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ThermalLab from './ThermalLab';
 import ThermalChart from './ThermalChart';
 import { showSuccess, showError } from '@/utils/toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from "@/lib/utils";
 
-interface ThermalValidationProps {
-  onRecordSaved: () => void;
-  constants: { metal: number; plastic: number };
-  initialData?: any;
-}
-
-const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalValidationProps) => {
+const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   const [nomeBatedouro, setNomeBatedouro] = useState('');
   const [volume, setVolume] = useState(20);
   const [material, setMaterial] = useState('Plástico');
@@ -41,223 +36,205 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: ThermalVal
     }
   }, [initialData]);
 
-  const SPECIFIC_HEAT = { Metal: 0.50, Plástico: 2.30 };
-  const C_ACAI = 4000;
-  const T0 = 80;
-  const TENV = 25;
-
-  const calculatePhysics = (m: string, v: number) => {
-    const cp = m === 'Metal' ? SPECIFIC_HEAT.Metal : SPECIFIC_HEAT.Plástico;
-    const baseK = m === 'Metal' ? constants.metal : constants.plastic;
-    const k = baseK / (cp * Math.pow(v || 1, 0.2));
-    const finalTemp = TENV + (T0 - TENV) * Math.exp(-k * 600);
+  const physics = useMemo(() => {
+    const cp = material === 'Metal' ? 0.50 : 2.30;
+    const baseK = material === 'Metal' ? constants.metal : constants.plastic;
+    const k = baseK / (cp * Math.pow(volume || 1, 0.2));
+    const finalTemp = 25 + (80 - 25) * Math.exp(-k * 600);
     const particleSpeed = 0.5 + (((finalTemp - 25) / 55) * 4);
-    return { k, finalTemp, isSafe: finalTemp >= 52.5, q: v * C_ACAI * (T0 - finalTemp), particleSpeed };
-  };
-
-  const currentPhysics = useMemo(() => calculatePhysics(material, volume), [volume, material, constants]);
+    return { k, finalTemp, isSafe: finalTemp >= 52.5, q: volume * 4000 * (80 - finalTemp), particleSpeed };
+  }, [volume, material, constants]);
 
   const handleSave = async () => {
-    if (!nomeBatedouro.trim()) {
-      showError("Identificação do batedouro necessária.");
-      return;
-    }
+    if (!nomeBatedouro.trim()) { showError("Identificação necessária."); return; }
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('amostras_termicas')
-        .insert([{ 
-          nome_batedouro: nomeBatedouro, 
-          material, 
-          volume, 
-          temp_final: parseFloat(currentPhysics.finalTemp.toFixed(1)), 
-          status_sanitario: currentPhysics.isSafe ? 'Processo Seguro' : 'Risco Biológico' 
-        }]);
+      const { error } = await supabase.from('amostras_termicas').insert([{ 
+        nome_batedouro: nomeBatedouro, material, volume, 
+        temp_final: parseFloat(physics.finalTemp.toFixed(1)), 
+        status_sanitario: physics.isSafe ? 'Processo Seguro' : 'Risco Biológico' 
+      }]);
       if (error) throw error;
       showSuccess("Dados científicos persistidos.");
       onRecordSaved();
-      setNomeBatedouro('');
-    } catch (err: any) {
-      showError("Falha na persistência: " + err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    } catch (err: any) { showError(err.message); } finally { setIsSaving(false); }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr_1.2fr] gap-8 max-w-[1600px] mx-auto items-start">
       
-      {/* Column 1: Control Panel (Left - 25%) */}
-      <div className="space-y-6 h-full">
-        <Card className="bg-white border-slate-200 p-6 space-y-8 shadow-sm h-full flex flex-col">
+      {/* Coluna 1: Painel de Controle Neon */}
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: [0.645, 0.045, 0.355, 1] }}
+        className="space-y-6"
+      >
+        <Card className="bg-white border-slate-200 p-8 space-y-8 shadow-sm rounded-[2.5rem] relative overflow-hidden">
           <div className="space-y-1">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Painel de Controle</h2>
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Configuração da Amostra</p>
+            <div className="flex items-center gap-2 text-[#1E562F]">
+              <Cpu size={18} className="animate-pulse" />
+              <h2 className="text-xl font-black tracking-tighter uppercase">Workbench v2.0</h2>
+            </div>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Configuração de Hardware</p>
           </div>
           
-          <div className="space-y-6 flex-1">
-            {/* ID Input */}
-            <div className="space-y-2">
-              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">ID do Batedouro</Label>
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Identificação da Unidade</Label>
               <input 
                 type="text"
                 value={nomeBatedouro}
                 onChange={(e) => setNomeBatedouro(e.target.value)}
-                placeholder="Identificação da Unidade"
-                className="w-full bg-slate-50 border-slate-200 text-slate-900 rounded-xl p-4 focus:ring-2 focus:ring-[#1E562F] outline-none transition-all font-mono text-sm"
+                className="w-full bg-slate-50 border-slate-200 text-slate-900 rounded-2xl p-5 focus:ring-4 focus:ring-[#1E562F]/10 outline-none transition-all font-mono text-sm shadow-inner"
+                placeholder="BATEDOURO_ID_001"
               />
             </div>
 
-            {/* Volume Slider */}
             <div className="space-y-6">
               <div className="flex justify-between items-end">
-                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume (L)</Label>
-                <span className="text-[#1E562F] font-black text-2xl font-mono">{volume}</span>
+                <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Volume de Amostra (L)</Label>
+                <span className="text-[#1E562F] font-black text-3xl font-mono tracking-tighter">{volume}</span>
               </div>
               <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} className="py-2" />
             </div>
 
-            {/* Material Bench Controls */}
-            <div className="space-y-3">
-              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Controles de Bancada</Label>
-              <div className="grid grid-cols-1 gap-2">
+            <div className="space-y-4">
+              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Material do Recipiente</Label>
+              <div className="grid grid-cols-1 gap-3">
                 <button 
                   onClick={() => setMaterial('Metal')}
                   className={cn(
-                    "flex items-center gap-3 p-4 rounded-xl border text-xs font-bold uppercase transition-all active:scale-95",
-                    material === 'Metal' 
-                      ? "bg-gradient-to-br from-slate-200 to-slate-300 border-slate-300 text-slate-800 shadow-md" 
-                      : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+                    "flex items-center justify-between p-5 rounded-2xl border-2 transition-all cubic-bezier-timing active:scale-95",
+                    material === 'Metal' ? "bg-slate-900 border-slate-900 text-white neon-glow-purple" : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                   )}
                 >
-                  <FlaskConical size={18} />
-                  <span>Aço Inoxidável</span>
+                  <div className="flex items-center gap-3">
+                    <FlaskConical size={20} />
+                    <span className="text-xs font-black uppercase">Aço Inoxidável</span>
+                  </div>
+                  {material === 'Metal' && <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />}
                 </button>
                 <button 
                   onClick={() => setMaterial('Plástico')}
                   className={cn(
-                    "flex items-center gap-3 p-4 rounded-xl border text-xs font-bold uppercase transition-all active:scale-95",
-                    material === 'Plástico' 
-                      ? "bg-[#1E562F] border-[#1E562F] text-white shadow-md" 
-                      : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+                    "flex items-center justify-between p-5 rounded-2xl border-2 transition-all cubic-bezier-timing active:scale-95",
+                    material === 'Plástico' ? "bg-[#1E562F] border-[#1E562F] text-white neon-glow-green" : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                   )}
                 >
-                  <Box size={18} />
-                  <span>Polímero (Isolante)</span>
+                  <div className="flex items-center gap-3">
+                    <Box size={20} />
+                    <span className="text-xs font-black uppercase">Polímero Técnico</span>
+                  </div>
+                  {material === 'Plástico' && <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Validation Trigger */}
-          <div className="pt-6 border-t border-slate-100">
-            <Button 
-              onClick={handleSave} 
-              disabled={isSaving} 
-              className="w-full bg-[#1E562F] hover:bg-[#164023] text-white h-16 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-[#1E562F]/20 transition-all active:scale-95"
-            >
-              {isSaving ? <Loader2 className="animate-spin mr-2" /> : (
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={20} />
-                  <span>Validar e Registrar</span>
-                </div>
-              )}
-            </Button>
-          </div>
-        </Card>
-      </div>
-
-      {/* Column 2: Real-Time Simulation (Center - 45%) */}
-      <div className="space-y-6">
-        <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-emerald-50 p-2 rounded-lg">
-                <Activity className="text-[#1E562F]" size={20} />
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving} 
+            className="w-full bg-slate-900 hover:bg-black text-white h-20 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95 group"
+          >
+            {isSaving ? <Loader2 className="animate-spin" /> : (
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={24} className="group-hover:rotate-12 transition-transform" />
+                <span>Executar Validação</span>
               </div>
-              <h3 className="font-black text-slate-900 uppercase tracking-widest text-sm">Simulação em Tempo Real</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Motor Ativo</span>
+            )}
+          </Button>
+        </Card>
+      </motion.div>
+
+      {/* Coluna 2: Simulação Central */}
+      <div className="space-y-8">
+        <motion.div 
+          layout
+          className="bg-white border border-slate-200 rounded-[3rem] p-10 shadow-sm space-y-10 relative overflow-hidden"
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="bg-emerald-50 p-3 rounded-2xl">
+                <Activity className="text-[#1E562F]" size={24} />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 uppercase tracking-widest text-sm">Live Simulation Engine</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase">Newtonian Cooling Model v4.2</p>
+              </div>
             </div>
           </div>
 
           <ThermalLab 
-            volume={volume}
-            material={material}
-            temp={currentPhysics.finalTemp}
-            isSafe={currentPhysics.isSafe}
-            particleSpeed={currentPhysics.particleSpeed}
+            volume={volume} material={material} 
+            temp={physics.finalTemp} isSafe={physics.isSafe} 
+            particleSpeed={physics.particleSpeed} 
           />
 
-          {/* Digital Displays Bar */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Temperatura Final</p>
-              <p className="text-2xl font-black text-emerald-400 font-mono">{currentPhysics.finalTemp.toFixed(1)}°C</p>
+          {/* Displays Digitais Estilo Laboratório */}
+          <div className="grid grid-cols-3 gap-6">
+            <div className="digital-display space-y-1">
+              <p className="text-[8px] font-black text-emerald-500/50 uppercase tracking-widest">Final_Temp</p>
+              <p className="text-3xl font-black">{physics.finalTemp.toFixed(2)}<span className="text-sm ml-1">°C</span></p>
             </div>
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Energia Térmica (Q)</p>
-              <p className="text-2xl font-black text-orange-500 font-mono">{Math.floor(currentPhysics.q / 1000)} <span className="text-xs">kJ</span></p>
+            <div className="digital-display space-y-1 border-orange-900/30">
+              <p className="text-[8px] font-black text-orange-500/50 uppercase tracking-widest">Thermal_Energy</p>
+              <p className="text-3xl font-black text-orange-400">{(physics.q / 1000).toFixed(1)}<span className="text-sm ml-1">kJ</span></p>
             </div>
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Constante (k)</p>
-              <p className="text-2xl font-black text-blue-400 font-mono">{currentPhysics.k.toFixed(4)}</p>
+            <div className="digital-display space-y-1 border-blue-900/30">
+              <p className="text-[8px] font-black text-blue-500/50 uppercase tracking-widest">Decay_Const</p>
+              <p className="text-3xl font-black text-blue-400">{physics.k.toFixed(4)}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Column 3: Analysis & Safety (Right - 30%) */}
-      <div className="space-y-6">
-        <ThermalChart k={currentPhysics.k} isSafe={currentPhysics.isSafe} />
+      {/* Coluna 3: Análise e Segurança */}
+      <div className="space-y-8">
+        <ThermalChart k={physics.k} isSafe={physics.isSafe} currentTemp={physics.finalTemp} />
 
-        <Card className={cn(
-          "p-6 border-2 transition-all duration-500 rounded-3xl shadow-sm",
-          currentPhysics.isSafe 
-            ? "bg-emerald-50 border-emerald-200" 
-            : "bg-red-50 border-red-200"
-        )}>
-          <div className="flex items-center gap-4">
-            <div className={cn(
-              "p-3 rounded-2xl",
-              currentPhysics.isSafe ? "bg-[#1E562F] text-white" : "bg-[#e41b13] text-white"
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={physics.isSafe ? 'safe' : 'danger'}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5, ease: "circOut" }}
+          >
+            <Card className={cn(
+              "p-8 border-4 rounded-[2.5rem] shadow-2xl transition-all duration-700",
+              physics.isSafe ? "bg-emerald-50 border-emerald-200 neon-glow-green" : "bg-red-50 border-red-200 neon-glow-red"
             )}>
-              {currentPhysics.isSafe ? <ShieldCheck size={24} /> : <AlertTriangle size={24} />}
-            </div>
-            <div className="space-y-1">
-              <h4 className={cn(
-                "font-black uppercase tracking-widest text-sm",
-                currentPhysics.isSafe ? "text-[#1E562F]" : "text-[#e41b13]"
-              )}>
-                Status Sanitário
-              </h4>
-              <p className="text-xs font-bold text-slate-600">
-                {currentPhysics.isSafe 
-                  ? "PROCESSO VALIDADO: SEGURO" 
-                  : "ALERTA: RISCO BIOLÓGICO"
-                }
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-slate-200/50">
-            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-              {currentPhysics.isSafe 
-                ? "A temperatura final de 52.5°C foi atingida, garantindo a inativação do T. cruzi conforme protocolos da Academia."
-                : "Atenção: A temperatura final está abaixo do limite crítico. Recomenda-se reduzir o volume ou utilizar recipientes metálicos."
-              }
-            </p>
-          </div>
-        </Card>
+              <div className="flex items-center gap-5">
+                <div className={cn(
+                  "p-4 rounded-2xl shadow-lg",
+                  physics.isSafe ? "bg-[#1E562F] text-white" : "bg-[#e41b13] text-white"
+                )}>
+                  {physics.isSafe ? <ShieldCheck size={32} /> : <AlertTriangle size={32} />}
+                </div>
+                <div className="space-y-1">
+                  <h4 className={cn(
+                    "font-black uppercase tracking-[0.1em] text-sm",
+                    physics.isSafe ? "text-[#1E562F]" : "text-[#e41b13]"
+                  )}>
+                    Status de Segurança
+                  </h4>
+                  <p className="text-lg font-black tracking-tighter text-slate-900">
+                    {physics.isSafe ? "VALIDADO: SEGURO" : "ALERTA: CRÍTICO"}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
 
-        <Card className="bg-white border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-blue-600">
-            <Zap size={16} />
-            <h4 className="text-[10px] font-black uppercase tracking-widest">Dica de Otimização</h4>
+        <Card className="bg-slate-900 border-slate-800 p-8 rounded-[2.5rem] shadow-sm space-y-4 group">
+          <div className="flex items-center gap-3 text-purple-400">
+            <Zap size={20} className="group-hover:scale-125 transition-transform" />
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Insight de Engenharia</h4>
           </div>
-          <p className="text-[10px] text-slate-600 leading-relaxed font-medium">
-            Recipientes de <span className="font-bold text-slate-900">Aço Inox</span> possuem condutividade térmica superior, acelerando o resfriamento em até 60% comparado ao polímero.
+          <p className="text-xs text-slate-400 leading-relaxed font-medium">
+            A curva de resfriamento segue uma <span className="text-white font-bold">decadência exponencial</span>. Para otimizar a segurança, considere reduzir o volume ou aumentar a área de contato superficial.
           </p>
         </Card>
       </div>

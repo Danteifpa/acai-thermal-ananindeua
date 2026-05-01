@@ -4,96 +4,45 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Slate 100 / #F1F5F9 */
-    --foreground: 215 25% 17%; /* Deep Slate #1F2937 */
-
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 17%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 17%;
-
-    --primary: 141 48% 23%; /* Deep IFPA Green #1E562F */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 40% 96.1%; /* Slate 50 */
-    --secondary-foreground: 215 25% 17%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 215 25% 17%;
-
-    --destructive: 2 84% 48%; /* IFPA Red #e41b13 */
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 141 48% 23%;
-
+    --background: 210 40% 98%;
+    --foreground: 215 25% 17%;
+    --primary: 141 48% 23%;
     --radius: 1rem;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-slate-100 text-slate-900 antialiased;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-slate-900 font-bold;
-  }
-  p {
-    @apply text-slate-700;
-  }
-}
-
 @layer components {
-  .glass-card {
-    @apply bg-white border border-slate-200 shadow-sm rounded-2xl transition-all duration-300;
+  .neon-glow-green {
+    box-shadow: 0 0 15px rgba(30, 86, 47, 0.3), 0 0 30px rgba(30, 86, 47, 0.1);
   }
   
-  .ifpa-button {
-    @apply bg-[#1E562F] hover:bg-[#164023] text-white shadow-lg shadow-[#1E562F]/10 active:scale-[0.98] transition-all;
+  .neon-glow-red {
+    box-shadow: 0 0 15px rgba(228, 27, 19, 0.3), 0 0 30px rgba(228, 27, 19, 0.1);
+  }
+
+  .neon-glow-purple {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3), 0 0 30px rgba(168, 85, 247, 0.1);
+  }
+
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-2xl;
+  }
+
+  .digital-display {
+    @apply font-mono tracking-tighter bg-slate-950 text-emerald-400 p-4 rounded-2xl border border-slate-800 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)];
   }
 }
 
-/* Custom Micro-Animations */
-@keyframes pulse-soft {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+/* Timing Functions Personalizadas */
+.cubic-bezier-timing {
+  transition-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
-@keyframes bobbing {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
-@keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes rotate-once {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 3s ease-in-out infinite;
-}
-
-.group:hover .animate-bobbing-hover {
-  animation: bobbing 1.5s ease-in-out infinite;
-}
-
-.group:hover .animate-bounce-hover {
-  animation: bounce-subtle 0.6s ease-in-out;
-}
-
-.group:hover .animate-rotate-hover {
-  animation: rotate-once 1s ease-in-out;
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
