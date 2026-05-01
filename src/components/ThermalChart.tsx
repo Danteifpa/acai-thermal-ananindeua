@@ -32,52 +32,52 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
     };
   });
 
-  const color = isSafe ? "#55FF00" : "#ef4444";
+  const color = isSafe ? "#1E562F" : "#e41b13";
 
   return (
-    <div className="lab-card p-6 space-y-4 rounded-2xl">
+    <div className="clinical-card p-6 space-y-4">
       <div className="flex justify-between items-center">
         <div className="space-y-1">
-          <h3 className="lab-title text-[10px]">Curva de Resfriamento</h3>
-          <p className="text-[8px] text-slate-600 font-bold uppercase">Modelo: Newton_Cooling_v1</p>
+          <h3 className="ifpa-title text-[10px]">Curva de Resfriamento</h3>
+          <p className="text-[8px] text-slate-400 font-bold uppercase">Modelo Matemático: Newton</p>
         </div>
       </div>
 
       <div className="h-56 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="0" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
             <XAxis 
               dataKey="time" 
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }} 
+              axisLine={{ stroke: '#e2e8f0' }} 
               tickLine={false} 
-              tick={{ fontSize: 9, fill: '#475569', fontWeight: 'bold' }}
+              tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
             />
             <YAxis 
               domain={[20, 85]} 
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }} 
+              axisLine={{ stroke: '#e2e8f0' }} 
               tickLine={false} 
-              tick={{ fontSize: 9, fill: '#475569', fontWeight: 'bold' }}
+              tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#000', border: '1px solid #55FF00', color: '#55FF00', fontSize: '10px', borderRadius: '8px' }}
-              itemStyle={{ color: '#55FF00' }}
+              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '10px' }}
+              itemStyle={{ color: '#1E562F', fontWeight: 'bold' }}
             />
             
             <Line 
               type="monotone" 
               dataKey="temp" 
               stroke={color} 
-              strokeWidth={2} 
+              strokeWidth={2.5} 
               dot={false}
               animationDuration={1000}
             />
 
             <ReferenceLine 
               y={52.5} 
-              stroke="rgba(255, 255, 255, 0.2)" 
-              strokeDasharray="3 3" 
-              label={{ position: 'right', value: '52.5°C', fill: 'rgba(255, 255, 255, 0.3)', fontSize: 8, fontWeight: 'bold' }} 
+              stroke="#94a3b8" 
+              strokeDasharray="5 5" 
+              label={{ position: 'right', value: '52.5°C', fill: '#94a3b8', fontSize: 8, fontWeight: 'bold' }} 
             />
           </ComposedChart>
         </ResponsiveContainer>

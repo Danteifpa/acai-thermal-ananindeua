@@ -29,7 +29,7 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
   return (
     <div className="w-64 bg-white flex flex-col h-screen sticky top-0 z-50 border-r border-slate-200">
       <div className="p-8 flex flex-col gap-1">
-        <h1 className="text-xl font-black text-slate-900 tracking-tighter">AÇAÍTHERMAL</h1>
+        <h1 className="text-xl font-black text-[#1E562F] tracking-tighter">AÇAÍTHERMAL</h1>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">IFPA 10 ANOS</p>
       </div>
       
@@ -43,8 +43,8 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                 isActive 
-                  ? "bg-slate-900 text-white shadow-lg" 
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-[#1E562F] text-white shadow-lg shadow-[#1E562F]/20" 
+                  : "text-slate-500 hover:bg-slate-50 hover:text-[#1E562F]"
               )}
             >
               <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
@@ -58,7 +58,7 @@ const Sidebar = ({ currentView, onViewChange }: SidebarProps) => {
         <div className="bg-slate-50 p-4 rounded-2xl">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Status</p>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#55FF00] rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-[#1E562F] rounded-full animate-pulse" />
             <span className="text-xs font-bold text-slate-900">Sistema Online</span>
           </div>
         </div>

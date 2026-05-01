@@ -11,7 +11,8 @@ import {
   Loader2, 
   AlertTriangle,
   Cpu,
-  Terminal
+  Terminal,
+  Activity
 } from 'lucide-react';
 import ThermalLab from './ThermalLab';
 import ThermalChart from './ThermalChart';
@@ -43,7 +44,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   }, [volume, material, constants]);
 
   const handleSave = async () => {
-    if (!nomeBatedouro.trim()) { showError("Identificação obrigatória."); return; }
+    if (!nomeBatedouro.trim()) { showError("Identificação da amostra é obrigatória."); return; }
     setIsSaving(true);
     try {
       const { error } = await supabase.from('amostras_termicas').insert([{ 
@@ -52,7 +53,7 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
         status_sanitario: physics.isSafe ? 'Processo Seguro' : 'Risco Biológico' 
       }]);
       if (error) throw error;
-      showSuccess("Validação registrada com sucesso.");
+      showSuccess("Validação registrada no banco de dados.");
       onRecordSaved();
     } catch (err: any) { showError(err.message); } finally { setIsSaving(false); }
   };
@@ -60,56 +61,56 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr_1.2fr] gap-8 max-w-[1600px] mx-auto items-start">
       
-      {/* Coluna 1: Configuração */}
+      {/* Coluna 1: Parâmetros de Entrada */}
       <div className="space-y-6">
-        <div className="lab-card p-8 space-y-8 rounded-2xl">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <Terminal className="text-[#55FF00]" size={20} />
-            <h2 className="lab-title text-sm">Configuração</h2>
+        <div className="clinical-card p-8 space-y-8">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <Activity className="text-[#1E562F]" size={20} />
+            <h2 className="ifpa-title text-sm">Parâmetros de Entrada</h2>
           </div>
           
           <div className="space-y-8">
             <div className="space-y-3">
-              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Unidade de Campo</Label>
+              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Identificação da Amostra</Label>
               <input 
                 type="text"
                 value={nomeBatedouro}
                 onChange={(e) => setNomeBatedouro(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 text-white p-4 focus:border-[#55FF00] outline-none transition-all text-sm rounded-xl"
-                placeholder="Nome do Batedouro..."
+                className="w-full bg-slate-50 border border-slate-200 text-slate-900 p-4 focus:border-[#1E562F] outline-none transition-all text-sm rounded-xl"
+                placeholder="Ex: Lote 042 - Ananindeua"
               />
             </div>
 
             <div className="space-y-6">
               <div className="flex justify-between items-end">
-                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume (L)</Label>
-                <span className="text-[#55FF00] font-black text-3xl font-mono">{volume}</span>
+                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Volume da Polpa (L)</Label>
+                <span className="text-slate-800 font-black text-3xl lcd-display">{volume}.0</span>
               </div>
               <Slider value={[volume]} onValueChange={(val) => setVolume(val[0])} max={50} min={1} step={1} />
             </div>
 
             <div className="space-y-4">
-              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Material</Label>
+              <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Material do Recipiente</Label>
               <div className="grid grid-cols-1 gap-3">
                 <button 
                   onClick={() => setMaterial('Metal')}
                   className={cn(
                     "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black rounded-xl",
-                    material === 'Metal' ? "bg-[#55FF00]/10 border-[#55FF00] text-[#55FF00]" : "bg-transparent border-slate-800 text-slate-500 hover:border-slate-700"
+                    material === 'Metal' ? "bg-[#1E562F]/5 border-[#1E562F] text-[#1E562F]" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
                   )}
                 >
-                  <span>Aço Inoxidável</span>
-                  {material === 'Metal' && <div className="w-2 h-2 bg-[#55FF00] rounded-full shadow-[0_0_10px_#55FF00]" />}
+                  <span>Aço Inoxidável (Metal)</span>
+                  {material === 'Metal' && <ShieldCheck size={16} />}
                 </button>
                 <button 
                   onClick={() => setMaterial('Plástico')}
                   className={cn(
                     "flex items-center justify-between p-4 border transition-all uppercase text-[10px] font-black rounded-xl",
-                    material === 'Plástico' ? "bg-[#55FF00]/10 border-[#55FF00] text-[#55FF00]" : "bg-transparent border-slate-800 text-slate-500 hover:border-slate-700"
+                    material === 'Plástico' ? "bg-[#1E562F]/5 border-[#1E562F] text-[#1E562F]" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
                   )}
                 >
-                  <span>Polímero Técnico</span>
-                  {material === 'Plástico' && <div className="w-2 h-2 bg-[#55FF00] rounded-full shadow-[0_0_10px_#55FF00]" />}
+                  <span>Polietileno (Plástico)</span>
+                  {material === 'Plástico' && <ShieldCheck size={16} />}
                 </button>
               </div>
             </div>
@@ -118,21 +119,22 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
           <Button 
             onClick={handleSave} 
             disabled={isSaving} 
-            className="w-full bg-[#55FF00] hover:bg-[#44cc00] text-black h-16 font-black uppercase tracking-widest transition-all rounded-xl shadow-lg shadow-[#55FF00]/10"
+            className="w-full bg-[#1E562F] hover:bg-[#164023] text-white h-16 font-black uppercase tracking-widest transition-all rounded-xl shadow-lg shadow-[#1E562F]/10"
           >
-            {isSaving ? <Loader2 className="animate-spin" /> : "Validar Processo"}
+            {isSaving ? <Loader2 className="animate-spin" /> : "Validar Processo Térmico"}
           </Button>
         </div>
       </div>
 
-      {/* Coluna 2: Telemetria Visual */}
+      {/* Coluna 2: Simulação e Telemetria */}
       <div className="space-y-8">
-        <div className="lab-card p-8 space-y-8 rounded-2xl">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div className="clinical-card p-8 space-y-8">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-4">
             <div className="flex items-center gap-3">
-              <Cpu className="text-[#55FF00]" size={20} />
-              <h3 className="lab-title text-sm">Telemetria Visual</h3>
+              <FlaskConical className="text-[#1E562F]" size={20} />
+              <h3 className="ifpa-title text-sm">Simulação de Laboratório</h3>
             </div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Ambiente Controlado</span>
           </div>
 
           <ThermalLab 
@@ -142,60 +144,60 @@ const ThermalValidation = ({ onRecordSaved, constants, initialData }: any) => {
           />
 
           <div className="grid grid-cols-3 gap-6">
-            <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-2xl space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Temp_Final</p>
-              <p className="text-2xl font-black text-[#55FF00] font-mono">{physics.finalTemp.toFixed(1)}°C</p>
+            <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl space-y-1">
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Temperatura Final</p>
+              <p className="text-3xl font-black text-slate-800 lcd-display">{physics.finalTemp.toFixed(1)}°C</p>
             </div>
-            <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-2xl space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Energia_Q</p>
-              <p className="text-2xl font-black text-[#55FF00] font-mono">{(physics.q / 1000).toFixed(0)}kJ</p>
+            <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl space-y-1">
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Energia Dissipada</p>
+              <p className="text-3xl font-black text-slate-800 lcd-display">{(physics.q / 1000).toFixed(0)}kJ</p>
             </div>
-            <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-2xl space-y-1">
-              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Const_K</p>
-              <p className="text-2xl font-black text-white font-mono">{physics.k.toFixed(4)}</p>
+            <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl space-y-1">
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Constante K</p>
+              <p className="text-3xl font-black text-slate-800 lcd-display">{physics.k.toFixed(4)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Coluna 3: Análise */}
+      {/* Coluna 3: Análise de Segurança */}
       <div className="space-y-8">
         <ThermalChart k={physics.k} isSafe={physics.isSafe} />
 
         <div className={cn(
           "p-6 border-2 transition-all duration-500 rounded-2xl",
-          physics.isSafe ? "bg-[#55FF00]/5 border-[#55FF00]/30" : "bg-red-500/5 border-red-500/30"
+          physics.isSafe ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
         )}>
           <div className="flex items-center gap-4">
             <div className={cn(
               "p-3 rounded-xl",
-              physics.isSafe ? "bg-[#55FF00] text-black" : "bg-red-500 text-white"
+              physics.isSafe ? "bg-[#1E562F] text-white" : "bg-[#e41b13] text-white"
             )}>
               {physics.isSafe ? <ShieldCheck size={24} /> : <AlertTriangle size={24} />}
             </div>
             <div className="space-y-1">
               <h4 className={cn(
                 "font-black uppercase tracking-widest text-[10px]",
-                physics.isSafe ? "text-[#55FF00]" : "text-red-500"
+                physics.isSafe ? "text-[#1E562F]" : "text-[#e41b13]"
               )}>
                 Status Sanitário
               </h4>
-              <p className="text-sm font-black text-white">
+              <p className="text-sm font-black text-slate-900">
                 {physics.isSafe ? "PROCESSO SEGURO" : "RISCO BIOLÓGICO"}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="lab-card p-6 space-y-4 rounded-2xl">
-          <div className="flex items-center gap-2 text-slate-500">
+        <div className="clinical-card p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-400">
             <Terminal size={16} />
-            <h4 className="text-[10px] font-black uppercase tracking-widest">Log de Sistema</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest">Relatório Técnico</h4>
           </div>
-          <p className="text-[10px] text-slate-600 leading-relaxed font-mono">
-            > Monitorando decaimento térmico...<br/>
-            > Parâmetros validados via Newton...<br/>
-            > Estabilidade térmica confirmada.
+          <p className="text-[10px] text-slate-500 leading-relaxed font-mono">
+            > Analisando decaimento térmico...<br/>
+            > Modelo: Lei de Resfriamento de Newton<br/>
+            > Validação biológica concluída.
           </p>
         </div>
       </div>

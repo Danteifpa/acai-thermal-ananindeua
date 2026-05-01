@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Flame, Droplets } from 'lucide-react';
+import { Bug } from 'lucide-react';
 
 interface ThermalLabProps {
   volume: number;
@@ -11,7 +11,7 @@ interface ThermalLabProps {
   particleSpeed: number;
 }
 
-const Particle = ({ containerWidth, containerHeight, speed }: { containerWidth: number, containerHeight: number, speed: number }) => {
+const Pathogen = ({ containerWidth, containerHeight, speed }: { containerWidth: number, containerHeight: number, speed: number }) => {
   const [pos, setPos] = useState({ x: Math.random() * containerWidth, y: Math.random() * containerHeight });
   const [vel, setVel] = useState({ 
     x: (Math.random() - 0.5) * speed, 
@@ -38,9 +38,11 @@ const Particle = ({ containerWidth, containerHeight, speed }: { containerWidth: 
 
   return (
     <div 
-      className="absolute w-1 h-1 bg-[#39FF14]/40 rounded-full"
+      className="absolute text-red-600/60"
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
-    />
+    >
+      <Bug size={8} />
+    </div>
   );
 };
 
@@ -50,46 +52,51 @@ const ThermalLab = ({
   temp, 
   particleSpeed 
 }: ThermalLabProps) => {
-  const particleCount = 30;
-
-  const getLiquidColor = () => {
-    if (temp > 70) return 'bg-red-600/40';
-    if (temp > 52.5) return 'bg-[#39FF14]/20';
-    return 'bg-blue-600/20';
-  };
+  const pathogenCount = temp < 52.5 ? 15 : 0;
 
   const getBorderColor = () => {
-    return material === 'Metal' ? 'border-slate-600' : 'border-slate-800';
+    return material === 'Metal' ? 'border-slate-300 bg-slate-100' : 'border-slate-200 bg-white/50';
   };
 
   return (
-    <div className="relative w-full h-[400px] bg-black/20 rounded-[5px] border border-white/5 overflow-hidden flex items-center justify-center">
-      {/* Grid Background Sutil */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px)', backgroundSize: '30px 30px' }} 
+    <div className="relative w-full h-[400px] bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex items-center justify-center">
+      {/* Grid de Laboratório */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '20px 20px' }} 
       />
 
       {/* Beaker */}
       <div className="relative scale-90">
-        <div className={`relative w-56 h-72 border-x-2 border-b-2 rounded-b-[20px] bg-black/40 backdrop-blur-sm transition-all duration-500 ${getBorderColor()}`}>
+        {/* Reflexo do Vidro */}
+        <div className="absolute -left-4 top-0 w-4 h-full bg-white/20 blur-sm rounded-full z-20 pointer-events-none" />
+        
+        <div className={`relative w-56 h-72 border-x-2 border-b-2 rounded-b-[30px] backdrop-blur-[2px] transition-all duration-500 z-10 ${getBorderColor()}`}>
+          {/* Líquido Açaí */}
           <div 
-            className={`absolute bottom-0 left-0 right-0 rounded-b-[18px] transition-all duration-1000 ease-in-out overflow-hidden ${getLiquidColor()}`}
+            className="absolute bottom-0 left-0 right-0 rounded-b-[28px] transition-all duration-1000 ease-in-out overflow-hidden bg-[#4A148C]"
             style={{ height: `${Math.min(95, 20 + (volume / 50) * 75)}%` }}
           >
+            {/* Patógenos (Trypanosoma cruzi) */}
             <div className="absolute inset-0">
-              {Array.from({ length: particleCount }).map((_, i) => (
-                <Particle key={i} containerWidth={224} containerHeight={288} speed={particleSpeed} />
+              {Array.from({ length: pathogenCount }).map((_, i) => (
+                <Pathogen key={i} containerWidth={224} containerHeight={288} speed={particleSpeed} />
               ))}
             </div>
+            
+            {/* Efeito de Brilho no Líquido */}
+            <div className="absolute top-0 left-0 w-full h-4 bg-white/10" />
           </div>
         </div>
 
-        {/* Thermometer Minimalista */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-          <div className="w-8 h-32 bg-black/60 rounded-full border border-white/10 relative flex flex-col items-center py-2">
-            <div className="w-1 flex-1 bg-slate-900 rounded-full relative overflow-hidden">
+        {/* Termômetro Clínico */}
+        <div className="absolute -right-12 top-1/2 -translate-y-1/2 flex flex-col items-center">
+          <div className="w-6 h-48 bg-white rounded-full border border-slate-200 relative flex flex-col items-center py-2 shadow-sm">
+            <div className="w-1.5 flex-1 bg-slate-100 rounded-full relative overflow-hidden">
               <div 
-                className="absolute bottom-0 left-0 right-0 transition-all duration-500 bg-[#39FF14]"
+                className={cn(
+                  "absolute bottom-0 left-0 right-0 transition-all duration-500",
+                  temp >= 52.5 ? "bg-[#1E562F]" : "bg-[#e41b13]"
+                )}
                 style={{ height: `${((temp - 25) / 55) * 100}%` }}
               />
             </div>
@@ -97,8 +104,9 @@ const ThermalLab = ({
         </div>
       </div>
 
-      <div className="absolute bottom-3 right-4">
-        <p className="text-[7px] font-black text-slate-700 uppercase tracking-widest">Simulação Ativa</p>
+      <div className="absolute bottom-4 left-6 flex items-center gap-2">
+        <div className="w-2 h-2 bg-[#1E562F] rounded-full animate-pulse" />
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Simulação em Tempo Real</p>
       </div>
     </div>
   );
