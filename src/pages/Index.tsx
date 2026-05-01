@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar, { ViewType } from '@/components/Sidebar';
 import ThermalValidation from '@/components/ThermalValidation';
-import DashboardStats from '@/components/DashboardStats';
+import HomeDashboard from '@/components/HomeDashboard';
 import FieldManagement from '@/components/FieldManagement';
 import SafetyProtocols from '@/components/SafetyProtocols';
 import TrainingAcademy from '@/components/TrainingAcademy';
@@ -11,7 +11,7 @@ import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('lab');
+  const [currentView, setCurrentView] = useState<ViewType>('home');
   const [records, setRecords] = useState([]);
   const [selectedBatedor, setSelectedBatedor] = useState<any>(null);
 
@@ -42,19 +42,11 @@ const Index = () => {
     switch (currentView) {
       case 'home':
         return (
-          <div className="space-y-10 animate-in fade-in duration-500 max-w-6xl mx-auto">
-            <header className="space-y-2">
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Início</h1>
-              <p className="text-slate-500 text-lg">Resumo das atividades de validação térmica.</p>
-            </header>
-            <DashboardStats records={records} />
-            <div className="bg-white border border-slate-200 p-12 rounded-[2rem] text-center space-y-6 shadow-sm">
-              <h3 className="text-3xl font-bold text-[#1E562F]">Bem-vindo ao AçaíThermal</h3>
-              <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed text-lg">
-                Este sistema foi desenvolvido para auxiliar batedores de açaí na validação científica do processo de branqueamento, 
-                garantindo a eliminação do Trypanosoma cruzi através de modelos termodinâmicos rigorosos.
-              </p>
-            </div>
+          <div className="animate-in fade-in duration-500 max-w-7xl mx-auto">
+            <HomeDashboard 
+              records={records} 
+              onStartSimulation={() => setCurrentView('lab')} 
+            />
           </div>
         );
       case 'lab':

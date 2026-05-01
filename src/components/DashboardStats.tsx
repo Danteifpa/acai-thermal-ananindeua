@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { ShieldCheck, Droplets, Box } from 'lucide-react';
+import { ShieldCheck, Droplets, Box, BarChart3, CheckCircle2 } from 'lucide-react';
 
 interface DashboardStatsProps {
   records: any[];
@@ -10,7 +10,6 @@ interface DashboardStatsProps {
 
 const DashboardStats = ({ records }: DashboardStatsProps) => {
   const total = records.length;
-  
   const safeCount = records.filter(r => r.status_sanitario === 'Processo Seguro').length;
   const complianceRate = total > 0 ? (safeCount / total) * 100 : 0;
   
@@ -27,42 +26,58 @@ const DashboardStats = ({ records }: DashboardStatsProps) => {
 
   const stats = [
     {
-      label: 'Status Sanitário',
-      value: `${complianceRate.toFixed(1)}% Seguro`,
-      subtext: `${safeCount} de ${total} amostras`,
-      icon: ShieldCheck,
+      label: 'Total de Lotes',
+      value: total.toString(),
+      subtext: 'Validações realizadas',
+      icon: BarChart3,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50'
+    },
+    {
+      label: 'Eficiência Média',
+      value: `${complianceRate.toFixed(1)}%`,
+      subtext: 'Processos seguros',
+      icon: CheckCircle2,
       color: 'text-[#1E562F]',
       bg: 'bg-emerald-50'
     },
     {
-      label: 'Volume Médio',
-      value: `${avgVolume.toFixed(1)} Litros`,
-      subtext: 'Média Ananindeua/PA',
-      icon: Droplets,
-      color: 'text-blue-700',
-      bg: 'bg-blue-50'
+      label: 'Status Sanitário',
+      value: safeCount.toString(),
+      subtext: 'Amostras aprovadas',
+      icon: ShieldCheck,
+      color: 'text-emerald-700',
+      bg: 'bg-emerald-50'
     },
     {
-      label: 'Material Predominante',
-      value: predominantMaterial,
-      subtext: 'Uso majoritário local',
-      icon: Box,
-      color: 'text-indigo-700',
+      label: 'Volume Médio',
+      value: `${avgVolume.toFixed(1)}L`,
+      subtext: 'Média por amostra',
+      icon: Droplets,
+      color: 'text-indigo-600',
       bg: 'bg-indigo-50'
+    },
+    {
+      label: 'Material Base',
+      value: predominantMaterial,
+      subtext: 'Uso majoritário',
+      icon: Box,
+      color: 'text-slate-600',
+      bg: 'bg-slate-50'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-white border-slate-200 p-6 flex items-center gap-4 hover:border-[#1E562F]/30 transition-all shadow-sm hover:shadow-md rounded-2xl">
-          <div className={`${stat.bg} p-3 rounded-xl`}>
-            <stat.icon className={stat.color} size={24} />
+        <Card key={index} className="bg-white border-slate-200 p-5 flex flex-col gap-3 hover:border-[#1E562F]/30 transition-all shadow-sm rounded-2xl">
+          <div className={`${stat.bg} ${stat.color} w-10 h-10 rounded-xl flex items-center justify-center`}>
+            <stat.icon size={20} />
           </div>
           <div>
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{stat.label}</p>
-            <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
-            <p className="text-slate-600 text-xs mt-1 font-medium">{stat.subtext}</p>
+            <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest">{stat.label}</p>
+            <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
+            <p className="text-slate-500 text-[10px] font-medium">{stat.subtext}</p>
           </div>
         </Card>
       ))}
