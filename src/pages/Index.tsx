@@ -12,7 +12,7 @@ import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('home');
+  const [currentView, setCurrentView] = useState<ViewType>('lab'); // Iniciando no Lab como solicitado
   const [records, setRecords] = useState([]);
   const [selectedBatedor, setSelectedBatedor] = useState<any>(null);
   const [thermalConstants, setThermalConstants] = useState({
@@ -49,13 +49,13 @@ const Index = () => {
         return (
           <div className="space-y-10 animate-in fade-in duration-500 max-w-6xl mx-auto">
             <header className="space-y-2">
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Início</h1>
+              <h1 className="text-4xl font-black text-white tracking-tight">Início</h1>
               <p className="text-slate-500 text-lg">Resumo das atividades de validação térmica.</p>
             </header>
             <DashboardStats records={records} />
-            <div className="bg-white border border-slate-200 p-10 rounded-3xl text-center space-y-4 shadow-sm">
-              <h3 className="text-2xl font-bold text-slate-900">Bem-vindo ao AçaíThermal</h3>
-              <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            <div className="lab-card p-12 rounded-[2rem] text-center space-y-6">
+              <h3 className="text-3xl font-bold text-[#55FF00]">Bem-vindo ao AçaíThermal</h3>
+              <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed text-lg">
                 Este sistema foi desenvolvido para auxiliar batedores de açaí na validação científica do processo de branqueamento, 
                 garantindo a eliminação do Trypanosoma cruzi através de modelos termodinâmicos rigorosos.
               </p>
@@ -96,12 +96,10 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900 font-sans selection:bg-blue-100">
+    <div className="flex min-h-screen bg-[#0B0E14] text-white font-sans selection:bg-[#55FF00]/30">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
       
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar view={currentView} />
-        
         <main className="flex-1 overflow-y-auto">
           <div className="p-12 space-y-12">
             {renderView()}
