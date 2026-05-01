@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar, { ViewType } from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
 import ThermalValidation from '@/components/ThermalValidation';
 import DashboardStats from '@/components/DashboardStats';
 import FieldManagement from '@/components/FieldManagement';
@@ -12,13 +11,9 @@ import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('lab'); // Iniciando no Lab como solicitado
+  const [currentView, setCurrentView] = useState<ViewType>('lab');
   const [records, setRecords] = useState([]);
   const [selectedBatedor, setSelectedBatedor] = useState<any>(null);
-  const [thermalConstants, setThermalConstants] = useState({
-    metal: 0.004,
-    plastic: 0.0015
-  });
 
   const fetchRecords = useCallback(async () => {
     try {
@@ -49,13 +44,13 @@ const Index = () => {
         return (
           <div className="space-y-10 animate-in fade-in duration-500 max-w-6xl mx-auto">
             <header className="space-y-2">
-              <h1 className="text-4xl font-black text-white tracking-tight">Início</h1>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Início</h1>
               <p className="text-slate-500 text-lg">Resumo das atividades de validação térmica.</p>
             </header>
             <DashboardStats records={records} />
-            <div className="lab-card p-12 rounded-[2rem] text-center space-y-6">
-              <h3 className="text-3xl font-bold text-[#55FF00]">Bem-vindo ao AçaíThermal</h3>
-              <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed text-lg">
+            <div className="bg-white border border-slate-200 p-12 rounded-[2rem] text-center space-y-6 shadow-sm">
+              <h3 className="text-3xl font-bold text-[#1E562F]">Bem-vindo ao AçaíThermal</h3>
+              <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed text-lg">
                 Este sistema foi desenvolvido para auxiliar batedores de açaí na validação científica do processo de branqueamento, 
                 garantindo a eliminação do Trypanosoma cruzi através de modelos termodinâmicos rigorosos.
               </p>
@@ -67,7 +62,6 @@ const Index = () => {
           <div className="animate-in fade-in duration-500">
             <ThermalValidation 
               onRecordSaved={fetchRecords} 
-              constants={thermalConstants}
               initialData={selectedBatedor}
             />
           </div>
@@ -96,7 +90,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0B0E14] text-white font-sans selection:bg-[#55FF00]/30">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#1E562F]/10">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} />
       
       <div className="flex-1 flex flex-col min-w-0">

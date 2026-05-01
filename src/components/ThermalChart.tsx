@@ -97,6 +97,3 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
       </div>
     </div>
   );
-};
-
-export default ThermalChart;
