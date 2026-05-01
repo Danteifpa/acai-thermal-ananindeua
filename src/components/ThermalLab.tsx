@@ -25,7 +25,7 @@ const Trypanosoma = ({ containerWidth, containerHeight, speed, isDissolving }: {
   });
 
   useEffect(() => {
-    if (isDissolving) return; // Para o movimento ao inativar
+    if (isDissolving) return;
 
     const interval = setInterval(() => {
       setPos(prev => {
@@ -66,7 +66,6 @@ const ThermalLab = ({
   temp, 
   isSafe 
 }: ThermalLabProps) => {
-  // Velocidade baseada na temperatura (Agitação Molecular)
   const speed = useMemo(() => 0.2 + (temp / 80) * 4, [temp]);
   const [showInactivation, setShowInactivation] = useState(false);
 
@@ -81,7 +80,7 @@ const ThermalLab = ({
 
   return (
     <div className="relative w-full h-[450px] bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden flex items-center justify-center shadow-inner">
-      {/* Grid de Laboratório Profissional */}
+      {/* Grid de Laboratório */}
       <div className="absolute inset-0 opacity-[0.05] pointer-events-none" 
            style={{ backgroundImage: 'linear-gradient(#1E562F 1px, transparent 1px), linear-gradient(90deg, #1E562F 1px, transparent 1px)', backgroundSize: '30px 30px' }} 
       />
@@ -94,22 +93,22 @@ const ThermalLab = ({
 
       {/* Beaker Container */}
       <div className="relative scale-100">
-        {/* Reflexo do Vidro Realista */}
+        {/* Reflexo do Vidro / Metal */}
         <div className="absolute -left-6 top-0 w-8 h-full bg-gradient-to-r from-white/30 to-transparent blur-md rounded-full z-20 pointer-events-none" />
         
         <div className={cn(
-          "relative w-64 h-80 border-x-[3px] border-b-[3px] rounded-b-[40px] backdrop-blur-[1px] transition-all duration-700 z-10",
-          material === 'Metal' ? 'border-slate-400 bg-slate-200/50' : 'border-white/80 bg-white/30 shadow-xl'
+          "relative w-64 h-80 border-x-[4px] border-b-[4px] rounded-b-[40px] backdrop-blur-[1px] transition-all duration-700 z-10",
+          material === 'Metal' 
+            ? 'border-slate-400 bg-gradient-to-b from-slate-200 to-slate-400 shadow-[inset_0_0_20px_rgba(0,0,0,0.1)]' 
+            : 'border-slate-200 bg-white/40 shadow-xl'
         )}>
-          {/* Líquido Açaí Roxo Profundo */}
+          {/* Líquido Açaí */}
           <div 
-            className="absolute bottom-0 left-0 right-0 rounded-b-[37px] transition-all duration-1000 ease-in-out overflow-hidden bg-[#4A148C] shadow-inner"
+            className="absolute bottom-0 left-0 right-0 rounded-b-[36px] transition-all duration-1000 ease-in-out overflow-hidden bg-[#4A148C] shadow-inner"
             style={{ height: `${Math.min(95, 25 + (volume / 50) * 70)}%` }}
           >
-            {/* Camada de Brilho do Líquido */}
             <div className="absolute top-0 left-0 w-full h-6 bg-white/10" />
             
-            {/* Parasitas Dinâmicos */}
             <div className="absolute inset-0 p-4">
               {Array.from({ length: 12 }).map((_, i) => (
                 <Trypanosoma 
@@ -124,7 +123,7 @@ const ThermalLab = ({
           </div>
         </div>
 
-        {/* Termômetro Clínico com Glow */}
+        {/* Termômetro */}
         <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center">
           <div className="w-8 h-56 bg-white rounded-full border-2 border-slate-200 relative flex flex-col items-center py-3 shadow-lg">
             <div className="w-2 flex-1 bg-slate-100 rounded-full relative overflow-hidden">
@@ -139,16 +138,10 @@ const ThermalLab = ({
                 }}
               />
             </div>
-            {/* Marcadores de Escala */}
-            <div className="absolute inset-y-4 left-full ml-1 flex flex-col justify-between text-[8px] font-bold text-slate-400">
-              <span>80°</span>
-              <span>52°</span>
-              <span>25°</span>
-            </div>
           </div>
         </div>
 
-        {/* Overlay de Segurança (Clímax) */}
+        {/* Overlay de Segurança */}
         {showInactivation && (
           <div className="absolute inset-0 -top-12 flex flex-col items-center justify-center z-40 animate-in zoom-in fade-in duration-700">
             <div className="bg-emerald-500 text-white p-4 rounded-full shadow-2xl shadow-emerald-500/50 animate-bounce">
@@ -159,14 +152,6 @@ const ThermalLab = ({
             </div>
           </div>
         )}
-      </div>
-
-      <div className="absolute bottom-6 right-8 flex flex-col items-end gap-1">
-        <div className="flex items-center gap-2">
-          <div className={cn("w-2 h-2 rounded-full animate-pulse", temp > 50 ? "bg-emerald-500" : "bg-amber-500")} />
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Monitoramento Ativo</p>
-        </div>
-        <p className="text-[8px] text-slate-400 font-mono">Agitação: {(speed * 10).toFixed(1)} Hz</p>
       </div>
     </div>
   );
