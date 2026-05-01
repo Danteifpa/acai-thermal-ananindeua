@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 
 interface ThermalChartProps {
-  k: number;
+  k: number; // Aqui k representa o coeficiente de perda h
   isSafe: boolean;
 }
 
@@ -26,6 +26,8 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
   
   const data = Array.from({ length: 60 }, (_, i) => {
     const t = (i / 59) * duration;
+    // Simulação de decaimento baseada no material (k)
+    // Se k for muito baixo (Inox), a temperatura estabiliza no plateau
     const temp = TENV + (T0 - TENV) * Math.exp(-k * t);
     return {
       time: Math.round(t / 60),
@@ -39,8 +41,8 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
     <div className="clinical-card p-6 space-y-4">
       <div className="flex justify-between items-center">
         <div className="space-y-1">
-          <h3 className="ifpa-title text-[10px]">Curva de Resfriamento</h3>
-          <p className="text-[8px] text-slate-400 font-bold uppercase">Análise de Decaimento Térmico</p>
+          <h3 className="ifpa-title text-[10px]">Análise de Estabilidade Térmica</h3>
+          <p className="text-[8px] text-slate-400 font-bold uppercase">Plateau vs Decaimento (Figura 3)</p>
         </div>
       </div>
 
@@ -66,15 +68,12 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
               itemStyle={{ color: '#1E562F', fontWeight: 'bold' }}
             />
             
-            {/* Área de Segurança */}
-            {isSafe && (
-              <ReferenceArea 
-                y1={52.5} 
-                y2={85} 
-                fill="#1E562F" 
-                fillOpacity={0.05} 
-              />
-            )}
+            <ReferenceArea 
+              y1={52.5} 
+              y2={85} 
+              fill={isSafe ? "#1E562F" : "#e41b13"} 
+              fillOpacity={0.03} 
+            />
 
             <Line 
               type="monotone" 
@@ -90,7 +89,7 @@ const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
               stroke={isSafe ? "#1E562F" : "#e41b13"} 
               strokeDasharray="5 5" 
               strokeWidth={1}
-              label={{ position: 'right', value: 'LIMITE 52.5°C', fill: isSafe ? '#1E562F' : '#e41b13', fontSize: 7, fontWeight: 'black' }} 
+              label={{ position: 'right', value: 'CRITICAL 52.5°C', fill: isSafe ? '#1E562F' : '#e41b13', fontSize: 7, fontWeight: 'black' }} 
             />
           </ComposedChart>
         </ResponsiveContainer>

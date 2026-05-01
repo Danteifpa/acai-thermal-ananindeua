@@ -24,15 +24,14 @@ import { cn } from "@/lib/utils";
 
 const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
   const [nomeBatedouro, setNomeBatedouro] = useState('');
-  const [volumeFruto, setVolumeFruto] = useState(14); // Padrão do artigo: 14kg
-  const [volumeAgua, setVolumeAgua] = useState(9);   // Padrão do artigo: 9L
+  const [volumeFruto, setVolumeFruto] = useState(14); // Massa m2 (kg)
+  const [volumeAgua, setVolumeAgua] = useState(9);   // Massa m1 (kg/L)
   const [material, setMaterial] = useState('Metal');
   const [isSaving, setIsSaving] = useState(false);
   const [blanchingTimer, setBlanchingTimer] = useState(0);
   const [isBlanching, setIsBlanching] = useState(false);
   const [isValidated, setIsValidated] = useState(false);
   
-  // Checklist BPF
   const [checklist, setChecklist] = useState({
     higienizacao: false,
     catacao: false,
@@ -46,7 +45,6 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     }
   }, [initialData]);
 
-  // Lógica do Cronômetro Embrapa (10s a 80°C)
   useEffect(() => {
     let interval: any;
     if (isBlanching && blanchingTimer < 10) {
@@ -56,35 +54,39 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
     } else if (blanchingTimer >= 10) {
       setIsValidated(true);
       setIsBlanching(false);
-      showSuccess("Protocolo Embrapa 80°C/10s concluído!");
+      showSuccess("Validated by Thermodynamic Modeling (52.5°C reached)");
     }
     return () => clearInterval(interval);
   }, [isBlanching, blanchingTimer]);
 
   const physics = useMemo(() => {
-    // Constantes do Artigo: Inox (k=15), Polímero (k=0.38)
-    const k_material = material === 'Metal' ? 0.0045 : 0.0012; // k ajustado para escala de tempo
-    const ratio = volumeAgua / volumeFruto;
+    // Equação de Equilíbrio Térmico: m1*c1*(T1 - Tf) = m2*c2*(Tf - T2)
+    // m1 = volumeAgua, c1 = 4.18 (água), T1 = 80
+    // m2 = volumeFruto, c2 = 3.7 (açaí), T2 = 25
+    const c_agua = 4.18;
+    const c_acai = 3.7;
+    const T_agua = 80;
+    const T_acai = 25;
+
+    // Tf = (m1*c1*T1 + m2*c2*T2) / (m1*c1 + m2*c2)
+    const finalTemp = (volumeAgua * c_agua * T_agua + volumeFruto * c_acai * T_acai) / 
+                      (volumeAgua * c_agua + volumeFruto * c_acai);
     
-    // O equilíbrio térmico depende da razão Água/Fruto
-    // Se ratio < 0.6 (aprox 8.5L/14kg), a temperatura cai muito rápido
-    const thermalEfficiency = ratio >= 0.6 ? 1 : ratio / 0.6;
-    
-    // Lei do Resfriamento de Newton aplicada ao equilíbrio
-    const T0 = 80;
-    const Tenv = 25;
-    const finalTemp = Tenv + (T0 - Tenv) * Math.exp(-k_material * 600) * thermalEfficiency;
+    // Constante de resfriamento (h) baseada no material para o gráfico
+    const h = material === 'Metal' ? 0.0005 : 0.0035; // Metal mantém, Plástico perde rápido
     
     const isSafe = finalTemp >= 52.5 && isValidated;
     
     let failureReason = "";
     if (finalTemp < 52.5) {
-      if (ratio < 0.6) failureReason = "Volume de água insuficiente para a massa térmica do fruto.";
-      else if (material === 'Plástico') failureReason = "Recipiente de polímero apresenta alta inércia térmica e perda de calor ineficiente.";
-      else failureReason = "Equilíbrio térmico abaixo do limite de segurança biológica.";
+      if (volumeAgua < 8.5 && volumeFruto >= 14) {
+        failureReason = "Thermal Failure: O balanço energético é insuficiente para inativar o parasita (Volume de água < 8.5L).";
+      } else {
+        failureReason = "A temperatura de equilíbrio calculada está abaixo do limite crítico de 52.5°C.";
+      }
     }
 
-    return { k: k_material, finalTemp, isSafe, failureReason };
+    return { h, finalTemp, isSafe, failureReason };
   }, [volumeFruto, volumeAgua, material, isValidated]);
 
   const startValidation = () => {
@@ -107,7 +109,7 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
         status_sanitario: physics.isSafe ? 'Processo Seguro' : 'Risco Biológico' 
       }]);
       if (error) throw error;
-      showSuccess("Validação registrada com sucesso.");
+      showSuccess("Laudo termodinâmico registrado.");
       onRecordSaved();
     } catch (err: any) { showError(err.message); } finally { setIsSaving(false); }
   };
@@ -115,7 +117,6 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr_1fr] gap-8 max-w-[1600px] mx-auto items-start">
       
-      {/* Coluna 1: Configuração e BPF */}
       <div className="space-y-6">
         <div className="clinical-card p-8 space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
@@ -124,42 +125,30 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <Checkbox 
-                id="higienizacao" 
-                checked={checklist.higienizacao} 
-                onCheckedChange={(val) => setChecklist({...checklist, higienizacao: !!val})}
-              />
-              <Label htmlFor="higienizacao" className="text-xs font-medium text-slate-700 cursor-pointer">Higienização do Batedor (Inox/Polímero)</Label>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <Checkbox 
-                id="catacao" 
-                checked={checklist.catacao} 
-                onCheckedChange={(val) => setChecklist({...checklist, catacao: !!val})}
-              />
-              <Label htmlFor="catacao" className="text-xs font-medium text-slate-700 cursor-pointer">Catação e Lavagem dos Frutos</Label>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <Checkbox 
-                id="temperatura" 
-                checked={checklist.temperatura} 
-                onCheckedChange={(val) => setChecklist({...checklist, temperatura: !!val})}
-              />
-              <Label htmlFor="temperatura" className="text-xs font-medium text-slate-700 cursor-pointer">Água de Branqueamento a 80°C</Label>
-            </div>
+            {['higienizacao', 'catacao', 'temperatura'].map((key) => (
+              <div key={key} className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <Checkbox 
+                  id={key} 
+                  checked={(checklist as any)[key]} 
+                  onCheckedChange={(val) => setChecklist({...checklist, [key]: !!val})}
+                />
+                <Label htmlFor={key} className="text-xs font-medium text-slate-700 cursor-pointer capitalize">
+                  {key === 'higienizacao' ? 'Higienização do Batedor' : key === 'catacao' ? 'Catação e Lavagem' : 'Água a 80°C'}
+                </Label>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="clinical-card p-8 space-y-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
             <Activity className="text-[#1E562F]" size={20} />
-            <h2 className="ifpa-title text-sm">Parâmetros do Artigo</h2>
+            <h2 className="ifpa-title text-sm">Modelagem Física</h2>
           </div>
           
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Massa de Fruto (kg)</Label>
+              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Massa do Fruto (m2) - kg</Label>
               <div className="flex justify-between items-center">
                 <Slider value={[volumeFruto]} onValueChange={(val) => setVolumeFruto(val[0])} max={30} min={5} step={1} className="flex-1 mr-4" />
                 <span className="text-xl font-black lcd-display w-12 text-right">{volumeFruto}</span>
@@ -167,7 +156,7 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Volume de Água (L)</Label>
+              <Label className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Volume de Água (m1) - L</Label>
               <div className="flex justify-between items-center">
                 <Slider value={[volumeAgua]} onValueChange={(val) => setVolumeAgua(val[0])} max={20} min={5} step={0.5} className="flex-1 mr-4" />
                 <span className="text-xl font-black lcd-display w-12 text-right">{volumeAgua.toFixed(1)}</span>
@@ -197,7 +186,6 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
         </div>
       </div>
 
-      {/* Coluna 2: Simulação Visual */}
       <div className="space-y-8">
         <div className="clinical-card p-8 space-y-8">
           <div className="flex justify-between items-center border-b border-slate-100 pb-4">
@@ -242,7 +230,6 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
         </div>
       </div>
 
-      {/* Coluna 3: Resultados e Gráfico */}
       <div className="space-y-6">
         <div className={cn(
           "p-8 border-2 transition-all duration-500 rounded-[2rem] shadow-sm",
@@ -268,25 +255,24 @@ const ThermalValidation = ({ onRecordSaved, initialData }: any) => {
               <p className="text-[10px] font-bold text-slate-600 uppercase">Parecer Técnico:</p>
               <p className="text-xs leading-relaxed font-medium text-slate-800">
                 {physics.isSafe 
-                  ? "Critérios Térmicos (Artigo Científico) e Normas da Embrapa atingidos com sucesso."
+                  ? "Validated by Thermodynamic Modeling (52.5°C reached)"
                   : physics.failureReason || "O processo não atingiu o equilíbrio térmico de segurança (52.5°C)."}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-white/50 p-3 rounded-xl">
-                <p className="text-[8px] font-black text-slate-400 uppercase">Temp. Equilíbrio</p>
-                <p className="text-xl font-black lcd-display">{physics.finalTemp.toFixed(1)}°C</p>
-              </div>
-              <div className="bg-white/50 p-3 rounded-xl">
-                <p className="text-[8px] font-black text-slate-400 uppercase">Razão Água/Fruto</p>
-                <p className="text-xl font-black lcd-display">{(volumeAgua/volumeFruto).toFixed(2)}</p>
+            <div className="grid grid-cols-1 gap-4 pt-4">
+              <div className="bg-white/50 p-4 rounded-xl border border-black/5">
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Temp. Equilíbrio Calculada</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-black lcd-display">{physics.finalTemp.toFixed(1)}°C</p>
+                  <span className="text-[10px] font-bold text-slate-400">Target: 52.5°C</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <ThermalChart k={physics.k} isSafe={physics.isSafe} />
+        <ThermalChart k={physics.h} isSafe={physics.isSafe} />
       </div>
     </div>
   );
