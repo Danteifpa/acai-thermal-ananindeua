@@ -4,45 +4,57 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 215 25% 17%;
-    --primary: 141 48% 23%;
-    --radius: 1rem;
+    --background: 222 47% 7%;
+    --foreground: 145 100% 54%; /* Neon Green */
+    --primary: 145 100% 54%;
+    --radius: 0px; /* Bordas retas técnicas */
+  }
+
+  body {
+    @apply bg-[#0E1117] text-[#39FF14] font-mono;
+    cursor: crosshair;
   }
 }
 
 @layer components {
-  .neon-glow-green {
-    box-shadow: 0 0 15px rgba(30, 86, 47, 0.3), 0 0 30px rgba(30, 86, 47, 0.1);
-  }
-  
-  .neon-glow-red {
-    box-shadow: 0 0 15px rgba(228, 27, 19, 0.3), 0 0 30px rgba(228, 27, 19, 0.1);
+  .nasa-panel {
+    @apply bg-[#0E1117] border border-[#39FF14]/30 shadow-[0_0_15px_rgba(57,255,20,0.1)];
   }
 
-  .neon-glow-purple {
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3), 0 0 30px rgba(168, 85, 247, 0.1);
+  .nasa-display {
+    @apply font-mono bg-black border border-[#00FFFF]/50 text-[#00FFFF] p-4 shadow-[inset_0_0_10px_rgba(0,255,255,0.2)];
   }
 
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-2xl;
+  .neon-text-glow {
+    text-shadow: 0 0 5px #39FF14, 0 0 10px #39FF14;
   }
 
-  .digital-display {
-    @apply font-mono tracking-tighter bg-slate-950 text-emerald-400 p-4 rounded-2xl border border-slate-800 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)];
+  .cyan-text-glow {
+    text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF;
+  }
+
+  .oscilloscope-grid {
+    background-image: 
+      linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }
 
-/* Timing Functions Personalizadas */
-.cubic-bezier-timing {
-  transition-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1);
+/* Animação de Scanline */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.scanline-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(57, 255, 20, 0.05), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
 }
