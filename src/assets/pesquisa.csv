@@ -1,0 +1,41 @@
+Código,1- Nome Fantasia,X (Latitude),Y (Longitude),Bairro,Armazenamento do fruto,Coleta pública, Acondicionamento do resíduo,Produção do caroço em lata/semana,Unidade (Litros/Lata),Produção do caroço em litros/semana ,Peso em Kg por lata,Resíduos de caroços em Kg/lata,Valor da LATA em R$,Descarte,Custo pago para descarte dos caroços 
+100,Acai do Pedro ,"-1,3459035","-48,4028601",Distrito Industrial,Tambores,Sim,Berg,100,6,600,12,1200,105,Outro,Năo paga
+101,Açaí da SN 38,"-1,343177","-48,3704647",Cidade Nova,Baldes plásticos,Năo,Berg,80,10,800,12,960,105,Outro,Năo paga
+102,Açaí do Gordo,"-1,3476378","-48,4029575",Cidade Nova,Caixas térmicas,Sim,Berg,40,8,320,12,480,180,Outro,"R$25,00"
+103,Açaí Campos,"-1,3438043","-48,3982705",Cidade Nova,Tambores,Sim,Berg,50,6,300,12,600,135,Outro,Năo paga
+104,Açaí Boas Novas,"-1,3424244","-48,3952442",Outro,Tambores,Sim,Berg,100,6,600,12,1200,135,Empres privada,Năo paga
+105,Açaí da União,"-1,3445861","-48,3681147",Distrito Industrial,Baldes plásticos/Tambores,Sim,Berg,30,5,150,12,360,135,Empres privada,Năo paga
+106,Açaí do Gui,"-1,3420578","-48,3655999",Distrito Industrial,Tambores,Sim,Berg,140,6,840,12,1680,140,Coleta pública,"R$25,00"
+107,Açaí Ouro Preto,"-1,3418505","-48,3652948",Distrito Industrial,Tambores,Năo,Berg,20,6,120,12,240,140,Coleta pública,"R$20,00"
+108,Açaí da irmã,"-1,3412297","-48,3647373",Distrito Industrial,Tambores,Sim,Berg,50,5,250,12,600,110,Empres privada,Năo paga
+109,Açaí do Fernando,"-1,3483176","-48,3623065",Distrito Industrial,Tambores,Năo,Berg,80,8,640,12,960,160,Empres privada,Năo paga
+110,Açaí do Paulinho,"-1,3493713","-48,3628562",Distrito Industrial,Tambores,Năo,Berg,70,8,560,12,840,160,Empres privada,"R$25,00"
+111,Açaí do Bom,"-1,345682","-48,3652009",Distrito Industrial,Basqueta,Sim,Berg,70,6,420,12,840,160,Empres privada,Năo paga
+112,Açai Adelson,"-1,3484951","-48,3751107",Maguari,Basqueta,Năo,Berg,100,5,500,12,1200,105,Empres privada,Năo paga
+113,Açai Salmo 91,"-1,3478306","-48,3746434",Maguari,Tambores,Sim,Berg,100,6,600,12,1200,100,Empres privada,Năo paga
+114,Açaí do Elias,"-1,3427964","-48,3662027",Distrito Industrial,Tambores,Sim,Berg,100,7,700,12,1200,150,Empres privada,Năo paga
+115,Açaí Emanuel JR,"-1,3435684","-48,365215",Distrito Industrial,Baldes plásticos,Sim,Berg,100,8,800,12,1200,150,Empres privada,Năo paga
+116,Açaí Iane,"-1,3460429","-48,3612506",Distrito Industrial,Caixas térmicas,Sim,Berg,100,10,1000,12,1200,160,Empres privada,Năo paga
+117,Açaí Fruto da Fé,"-1,3480144","-48,3610759",Distrito Industrial,Baldes plásticos,Sim,Berg,100,"7,5",750,12,1200,100,Empres privada,Năo paga
+118,Açaí da Ilha,"-1,3619899","-48,4059427",Cidade Nova,Baldes plásticos,Sim,Berg,30,4,120,12,360,170,Empres privada,Năo paga
+119,Papá chibe,"-1,361986","-48,4058999",Cidade Nova ,Baldes plásticos/Tambores,Sim,Berg,100,5,500,12,1200,125,Empres privada,Năo paga
+120,Açaizăo,"-1,3628055","-48,4058512",Cidade Nova,Basquetas,Sim,Berg,36,6,216,12,432,130,Empres privada,Năo paga
+121,Fonte do Açaí,"-1,361789","-48,4043422",Cidade Nova,Baldes plásticos/Tambores,Sim,Berg,50,5,250,12,600,100,Outro,Năo paga
+122,Império do Açaí,"-1,3614157","-48,4038309",Cidade Nova,Basquetas,Sim,Berg,80,"7,5",600,12,960,108,Empres privada,Năo paga
+123,Açaí da Mana,"-1,3588214","-48,4013059",Cidade Nova,Tambores,Sim,Berg,65,8,520,12,780,145,Outro,"R$25,00"
+124,Açaí Tokyo,"-1,3585835","-48,401188",Cidade Nova,Tambores,Sim,Berg,65,8,520,12,780,145,Outro,Não paga
+125,Açaí Ideal,"-1,3585596","-48,4012127",Cidade Nova,Tambores,Sim,Berg,75,10,750,12,900,95,Empres privada,Não paga
+126,Açaí do Cametá,"-1,3569816","-48,4012308",Icuí-Guajará,Baldes plásticos/Tambores,Sim,Berg,40,"7,5",300,12,600,130,Empres privada,Não paga
+127,Papa Açaí,"-1,3489585","-48,4028477",Guajará,Sacolas vermelhas,Sim,Berg,21,9,189,12,252,95,Empres privada,Não paga
+128,Açaí Maná,"-1,3434794","-48,4070813",Guajará,Tambores,Sim,Berg,28,10,280,12,336,95,Empres privada,Não paga
+129,Natural açaí ,"-1,3427018","-48,392789",Maguari,Tambores,Sim,Berg,30,7,210,12,360,125,Empres privada,Não paga
+130,Açaí do Junior,"-1,3504128","-48,3864461",Maguari,Tambores,Sim,Céu aberto,30,8,240,12,360,120,Empres privada,Não paga
+131,Açaí do Mano,"-1,3475533","-48,3840818",Distrito Industrial,Baldes plásticos,Sim,Berg,50,10,500,12,600,160,Empres privada,Não paga
+132,Açaí da Mada,"-1,3470954","-48,3815082",Icuí-Guajará ,Tambores,Sim,Berg,100,5,500,12,1200,90,Outro,20 reais
+133,Natural açaí ,"-1,3474089","-48,3632299",Icui-Guajará ,Tambores,Sim,Berg,50,10,500,12,600,220,Outro,Nao paga
+134,Açaí prime,"-1,3433999","-48,401867",Coqueiro,Baldes plásticos,Sim,Berg,50,5,250,12,600,100,Outro,15 reais
+135,Açaí Goumert,"-1,3490627","-48,4084032",Cidade Nova,Tambores,Sim,Berg,50,5,250,12,600,100,Empres privada,"R$10,00"
+136,Point do Açaí,"-1,351903","-48,410455",Cidade Nova,Tambores,Năo,Berg,210,7,1470,12,2520,100,Outro,"R$25,00"
+137,Chef do Açaí,"-1,3517874","-48,4071049",Cidade Nova,Tambores,Sim,Berg,200,6,1200,12,2400,100,Empres privada,Nao paga
+138,Açaí do Rafa,"-1,3414268","-48,3915318",Paar,Basquetas/Tambores,Sim,Berg,200,5,1000,12,2400,85,Outro,"R$20,00"
+139,Açaí Top Light,"-1,34045","-48,3903268",Paar,Tambores,Sim,Berg,200,7,1400,12,2400,85,Empres privada,Não paga
