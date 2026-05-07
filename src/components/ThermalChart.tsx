@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   Line, 
   XAxis, 
@@ -10,104 +10,83 @@ import {
   ResponsiveContainer, 
   ReferenceLine,
   ComposedChart,
-  ReferenceArea,
-  Legend
+  ReferenceArea
 } from 'recharts';
 
 interface ThermalChartProps {
-  k: number; 
-  isSafe: boolean;
+  targetTemp: number;
+  isSimulating: boolean;
+  currentTime: number;
 }
 
-const ThermalChart = ({ k, isSafe }: ThermalChartProps) => {
-  const T0_WATER = 80;
-  const T0_ACAI = 25;
-  const TENV = 25;
-  const duration = 1200; 
-  
-  const data = Array.from({ length: 60 }, (_, i) => {
-    const t = (i / 59) * duration;
-    
-    // Temperatura da Água (Decaimento externo)
-    const waterTemp = TENV + (T0_WATER - TENV) * Math.exp(-k * t);
-    
-    // Temperatura do Núcleo do Açaí (Aquecimento interno até o equilíbrio)
-    // Simplificado: tende ao equilíbrio térmico calculado
-    const equilibrium = 52.5; // Alvo científico
-    const acaiTemp = T0_ACAI + (equilibrium - T0_ACAI) * (1 - Math.exp(-0.005 * t));
+const ThermalChart = ({ targetTemp, isSimulating, currentTime }: ThermalChartProps) => {
+  const data = useMemo(() => {
+    const points = [];
+    const wn = 0.45;
+    const zeta = 0.75;
+    const T0 = 25;
+    const deltaT = targetTemp - T0;
 
-    return {
-      time: Math.round(t / 60),
-      waterTemp: parseFloat(waterTemp.toFixed(2)),
-      acaiTemp: parseFloat(acaiTemp.toFixed(2)),
-    };
-  });
+    for (let t = 0; t <= 60; t++) {
+      // Resposta de 2ª Ordem: T(t) = T0 + deltaT * (1 - exp(-zeta*wn*t) * (cos(wd*t) + (zeta*wn/wd)*sin(wd*t)))
+      // Simplificado para amortecimento crítico/subcrítico
+      const wd = wn * Math.sqrt(1 - zeta * zeta);
+      const response = 1 - Math.exp(-zeta * wn * t) * (Math.cos(wd * t) + (zeta * wn / wd) * Math.sin(wd * t));
+      const currentT = T0 + deltaT * response;
+
+      points.push({
+        time: t,
+        temp: t <= currentTime || !isSimulating ? parseFloat(currentT.toFixed(2)) : null,
+        threshold: 52.5
+      });
+    }
+    return points;
+  }, [targetTemp, currentTime, isSimulating]);
 
   return (
-    <div className="clinical-card p-6 space-y-4">
+    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
       <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h3 className="ifpa-title text-[10px]">Estabilidade Térmica: Água vs Núcleo</h3>
-          <p className="text-[8px] text-slate-400 font-bold uppercase">Análise de Penetração de Calor</p>
+        <h3 className="text-[10px] font-black uppercase text-[#1E562F]">Resposta do Núcleo (2ª Ordem)</h3>
+        <div className="flex gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-[#1E562F] rounded-full" />
+            <span className="text-[8px] font-bold text-slate-400">NÚCLEO</span>
+          </div>
         </div>
       </div>
 
-      <div className="h-56 w-full">
+      <div className="h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-            <XAxis 
-              dataKey="time" 
-              axisLine={{ stroke: '#e2e8f0' }} 
-              tickLine={false} 
-              tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
-            />
-            <YAxis 
-              domain={[20, 85]} 
-              axisLine={{ stroke: '#e2e8f0' }} 
-              tickLine={false} 
-              tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
-            />
+            <XAxis dataKey="time" hide />
+            <YAxis domain={[20, 85]} hide />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '10px' }}
+              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+              labelStyle={{ display: 'none' }}
             />
-            <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
             
-            <ReferenceArea 
-              y1={52.5} 
-              y2={85} 
-              fill={isSafe ? "#1E562F" : "#e41b13"} 
-              fillOpacity={0.03} 
-            />
-
+            <ReferenceArea y1={52.5} y2={85} fill="#1E562F" fillOpacity={0.05} />
+            
             <Line 
-              name="Temp. Água (Externa)"
               type="monotone" 
-              dataKey="waterTemp" 
-              stroke="#3b82f6" 
-              strokeWidth={2} 
-              dot={false}
-            />
-
-            <Line 
-              name="Temp. Açaí (Núcleo)"
-              type="monotone" 
-              dataKey="acaiTemp" 
-              stroke={isSafe ? "#1E562F" : "#e41b13"} 
+              dataKey="temp" 
+              stroke="#1E562F" 
               strokeWidth={3} 
-              dot={false}
+              dot={false} 
+              animationDuration={0}
             />
 
             <ReferenceLine 
               y={52.5} 
               stroke="#1E562F" 
               strokeDasharray="5 5" 
-              strokeWidth={1}
-              label={{ position: 'right', value: '52.5°C THRESHOLD', fill: '#1E562F', fontSize: 7, fontWeight: 'black' }} 
+              label={{ position: 'right', value: '52.5°C', fill: '#1E562F', fontSize: 10, fontWeight: 'black' }} 
             />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
+      <p className="text-[8px] text-slate-400 font-bold text-center uppercase tracking-widest">Tempo de Resposta: 60 Segundos</p>
     </div>
   );
 };
