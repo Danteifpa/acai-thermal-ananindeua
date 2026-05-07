@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Play, Upload, Database, Search, Filter, FileSpreadsheet } from 'lucide-react';
+import { Loader2, Play, Search, Filter, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import { showSuccess, showError } from '@/utils/toast';
+import { cn } from "@/lib/utils";
 
 interface Batedor {
   id: string;
@@ -18,6 +19,8 @@ interface Batedor {
   material: string;
   volume_padrao: number;
   status_risco?: string;
+  x?: number;
+  y?: number;
 }
 
 interface BatedoresDatabaseProps {
@@ -32,10 +35,12 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [bairroFilter, setBairroFilter] = useState('todos');
 
+  const TABLE_NAME = 'batedouros_ananindeua';
+
   const fetchBatedores = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('batedouros_ananindeua').select('*').order('nome');
+      const { data, error } = await supabase.from(TABLE_NAME).select('*').order('nome');
       if (error) throw error;
       setBatedores(data || []);
       setFilteredBatedores(data || []);
@@ -61,7 +66,6 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
 
   const bairros = Array.from(new Set(batedores.map(b => b.bairro))).sort();
 
-  // Função de Normalização de Materiais (Conforme solicitado)
   const normalizeMaterial = (rawMaterial: string): string => {
     const m = rawMaterial?.toLowerCase() || '';
     if (m.includes('plástico') || m.includes('balde') || m.includes('polietileno')) return 'Plástico';
@@ -83,13 +87,21 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rawData = XLSX.utils.sheet_to_json(ws);
 
-        // Limpa a tabela antes da nova migração (Opcional, dependendo do fluxo)
-        await supabase.from('batedouros_ananindeua').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // Limpa a tabela antes da nova migração
+        await supabase.from(TABLE_NAME).delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
         const formattedData = rawData.map((row: any) => {
           const nome = row['1- Nome Fantasia'] || row['Nome'];
+          
+          // Conversão Segura de Tipos (Casting)
           const volumeStr = String(row['Unidade (Litros/Lata)'] || row['Volume'] || '0');
           const volume = parseFloat(volumeStr.replace(',', '.'));
+          
+          const xStr = String(row['X'] || '0');
+          const yStr = String(row['Y'] || '0');
+          const x = parseFloat(xStr.replace(',', '.'));
+          const y = parseFloat(yStr.replace(',', '.'));
+
           const rawMaterial = row['Armazenamento do fruto'] || row['Material'] || 'Não Informado';
           
           if (!nome || isNaN(volume)) return null;
@@ -99,12 +111,13 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
             bairro: row['Bairro'] || 'Não Informado',
             material: normalizeMaterial(rawMaterial),
             volume_padrao: volume,
-            status_risco: volume < 8.5 ? '🔴 Risco Térmico' : '✅ Conforme'
+            status_risco: volume < 8.5 ? '🔴 Risco Térmico' : '✅ Conforme',
+            x: isNaN(x) ? 0 : x,
+            y: isNaN(y) ? 0 : y
           };
         }).filter(Boolean);
 
-        // Bulk Insert no Supabase
-        const { error } = await supabase.from('batedouros_ananindeua').insert(formattedData);
+        const { error } = await supabase.from(TABLE_NAME).insert(formattedData);
         if (error) throw error;
 
         showSuccess(`${formattedData.length} batedouros normalizados e migrados.`);
@@ -160,7 +173,7 @@ const BatedoresDatabase = ({ onSimulate }: BatedoresDatabaseProps) => {
             <TableRow className="border-slate-200">
               <TableHead className="text-slate-900 font-bold py-5 pl-6">Batedouro</TableHead>
               <TableHead className="text-slate-900 font-bold">Bairro</TableHead>
-              <TableHead className="text-slate-900 font-bold">Material Normalizado</TableHead>
+              <TableHead className="text-slate-900 font-bold">Material</TableHead>
               <TableHead className="text-slate-900 font-bold">Volume (L)</TableHead>
               <TableHead className="text-slate-900 font-bold">Status Prévio</TableHead>
               <TableHead className="text-slate-900 font-bold text-right pr-6">Ação</TableHead>
